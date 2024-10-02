@@ -12,7 +12,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       login: async (username, password) => {
         try {
           const response = await fetch(
-            "http://localhost:3001/customer/login-customer",
+            "https://backend-cafeteria-production-30e1.up.railway.app/customer/login-customer",
             {
               method: "POST",
               headers: {
@@ -58,7 +58,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       requestCustomerProducts: async () => {
         try {
           const response = await fetch(
-            "http://localhost:3001/product/customer-request-products"
+            "https://backend-cafeteria-production-30e1.up.railway.app/product/customer-request-products"
           );
           const data = await response.json();
 
@@ -74,7 +74,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       requestCustomerCombos: async () => {
         try {
           const response = await fetch(
-            "http://localhost:3001/combo_menu/customer-request-combos"
+            "https://backend-cafeteria-production-30e1.up.railway.app/combo_menu/customer-request-combos"
           );
           const data = await response.json();
 
@@ -91,7 +91,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token } = getStore();
         try {
           const response = await fetch(
-            "http://localhost:3001/favorite/list-favorites-customer",
+            "https://backend-cafeteria-production-30e1.up.railway.app/favorite/list-favorites-customer",
             {
               method: "GET",
               headers: {
@@ -107,8 +107,6 @@ const getState = ({ getActions, getStore, setStore }) => {
             setStore({ customerFavorites: favorites });
           } else {
             console.error("Error al obtener favoritos: ", favorites.error);
-            console.log(getStore().customerFavorites);
-
           }
         } catch (err) {
           console.error("Error al obtener favoritos: ", err);
@@ -118,7 +116,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token } = getStore();
         try {
           const response = await fetch(
-            "http://localhost:3001/favorite/add-to-favorites-customer",
+            "https://backend-cafeteria-production-30e1.up.railway.app/favorite/add-to-favorites-customer",
             {
               method: "POST",
               headers: {
@@ -148,7 +146,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token } = getStore();
         try {
           const response = await fetch(
-            "http://localhost:3001/favorite/remove-favorite-customer",
+            "https://backend-cafeteria-production-30e1.up.railway.app/favorite/remove-favorite-customer",
             {
               method: "DELETE",
               headers: {
