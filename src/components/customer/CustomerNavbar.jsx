@@ -8,7 +8,7 @@ const CustomerNavbar = () => {
 
   const handleLogout = () => {
     actions.logout();
-    navigate("/customer-login");
+    navigate("/");
     window.location.reload(); // Refresca la página para actualizar la memoria
   };
 
