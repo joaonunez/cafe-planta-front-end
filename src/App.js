@@ -22,7 +22,7 @@ function App() {
     <>
       {store.token && <CustomerNavbar />}  {/* Solo mostrar la navbar si está logueado */}
       <Routes>
-        <Route path='/' element={<LoginForm />} />
+        <Route path='/customer-login' element={<LoginForm />} />
         <Route path='/combos' element={<Combos />} />
         <Route path='/products' element={<Products />} />
         <Route path='/favorites' element={<Favorites />} />
