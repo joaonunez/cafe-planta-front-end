@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Route, Routes, useNavigate } from 'react-router-dom';
 import injectContext, { Context } from './store/context';
 import Products from './views/merchandise/Products';
 import Favorites from './views/customer/Favorites';
