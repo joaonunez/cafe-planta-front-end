@@ -6,6 +6,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       error: null,
       customerRequestProducts: [],
       customerRequestCombos: [],
+      customerFavorites: [],
     },
     actions: {
       login: async (username, password) => {
@@ -24,7 +25,6 @@ const getState = ({ getActions, getStore, setStore }) => {
 
           const result = await response.json();
 
-          // Comprobar si el login fue exitoso
           if (response.ok && result.token) {
             // Guardar el usuario y token en el store
             setStore({
@@ -38,7 +38,6 @@ const getState = ({ getActions, getStore, setStore }) => {
             localStorage.setItem("token", result.token);
             return true;
           } else {
-            // Manejar errores de autenticación
             setStore({ error: result.error });
             return false;
           }
@@ -49,7 +48,6 @@ const getState = ({ getActions, getStore, setStore }) => {
         }
       },
       logout: () => {
-        // Limpiar el store y localStorage al cerrar sesión
         setStore({
           user: null,
           token: null,
@@ -67,10 +65,10 @@ const getState = ({ getActions, getStore, setStore }) => {
           if (response.ok) {
             setStore({ customerRequestProducts: data });
           } else {
-            console.error("Error fetching products: ", data);
+            console.error("Error al obtener productos: ", data);
           }
         } catch (err) {
-          console.error("Error in requestCustomerProducts action: ", err);
+          console.error("Error en requestCustomerProducts: ", err);
         }
       },
       requestCustomerCombos: async () => {
@@ -83,10 +81,94 @@ const getState = ({ getActions, getStore, setStore }) => {
           if (response.ok) {
             setStore({ customerRequestCombos: data });
           } else {
-            console.error("Error fetching combos: ", data);
+            console.error("Error al obtener combos: ", data);
           }
         } catch (err) {
-          console.error("Error in requestCustomerCombos action: ", err);
+          console.error("Error en requestCustomerCombos: ", err);
+        }
+      },
+      getFavorites: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(
+            "http://localhost:3001/favorite/list-favorites-customer",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              credentials: "include", // Incluir cookies en la solicitud
+            }
+          );
+
+          const favorites = await response.json();
+
+          if (response.ok) {
+            setStore({ customerFavorites: favorites });
+          } else {
+            console.error("Error al obtener favoritos: ", favorites.error);
+            console.log(getStore().customerFavorites);
+
+          }
+        } catch (err) {
+          console.error("Error al obtener favoritos: ", err);
+        }
+      },
+      addFavorite: async (itemId, itemTypeId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(
+            "http://localhost:3001/favorite/add-to-favorites-customer",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                item_id: itemId,
+                item_type_id: itemTypeId,
+              }),
+              credentials: "include",
+            }
+          );
+
+          const result = await response.json();
+
+          if (response.ok) {
+            getActions().getFavorites(); // Refrescar la lista de favoritos
+          } else {
+            console.error("Error al agregar favorito: ", result.error);
+          }
+        } catch (err) {
+          console.error("Error al agregar favorito: ", err);
+        }
+      },
+      removeFavorite: async (itemId, itemTypeId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(
+            "http://localhost:3001/favorite/remove-favorite-customer",
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ item_id: itemId, item_type_id: itemTypeId }),
+              credentials: "include",
+            }
+          );
+
+          const result = await response.json();
+
+          if (response.ok) {
+            getActions().getFavorites(); // Refrescar la lista de favoritos
+          } else {
+            console.error("Error al eliminar favorito: ", result.error);
+          }
+        } catch (err) {
+          console.error("Error al eliminar favorito: ", err);
         }
       },
     },
