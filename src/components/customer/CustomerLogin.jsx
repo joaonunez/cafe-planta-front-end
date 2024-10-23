@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../../store/context';
 
-const LoginForm = () => {
+const CustomerLogin = () => {
   const { actions, store } = React.useContext(Context);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +12,7 @@ const LoginForm = () => {
     e.preventDefault();
     const success = await actions.login(username, password);
     if (success) {
-      navigate("/combos");  // Redirigir después de iniciar sesión
+      navigate("/combos");
     } else {
       alert(store.error);
     }
@@ -54,4 +54,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default CustomerLogin;

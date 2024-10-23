@@ -6,27 +6,30 @@ import Favorites from './views/customer/Favorites';
 import PurchaseHistory from './views/customer/PurchaseHistory';
 import Combos from './views/merchandise/Combos';
 import CustomerNavbar from './components/customer/CustomerNavbar';
-import LoginView from './views/customer/LoginView';
+import ManagerLoginView from './views/manager/login/ManagerLoginView';
+import Home from './views/home/Home';
+import CustomerLoginView from './views/customer/CustomerLoginView';
 
 function App() {
   const { store } = React.useContext(Context);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!store.token) {
-      navigate("/");
-    }
   }, [store.token, navigate]);
 
   return (
     <>
       {store.token && <CustomerNavbar />}  {/* Solo mostrar la navbar si está logueado */}
       <Routes>
-        <Route path='/' element={<LoginView />} />
+        <Route path='/' element={<Home />} />
+        <Route path='/login' element={<CustomerLoginView />} />
         <Route path='/combos' element={<Combos />} />
         <Route path='/products' element={<Products />} />
         <Route path='/favorites' element={<Favorites />} />
         <Route path='/purchase-history' element={<PurchaseHistory />} />
+        <Route path='/manager-login' element={<ManagerLoginView />} />
+
+
       </Routes>
     </>
   );

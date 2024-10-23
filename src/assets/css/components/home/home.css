@@ -1,0 +1,46 @@
+.home-container {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    background-image: url('https://res.cloudinary.com/dsk6jeymj/image/upload/v1729706531/25d577869fcc0521d110bdb30fae7802-ilustracion-de-cafeteria-plana_ql4anl.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.background-image {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparente para mejorar la legibilidad */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.product-demo {
+    margin-top: 20px;
+}
+
+.product-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.product-item {
+    margin: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo claro para los productos */
+    border-radius: 5px;
+    max-width: 150px;
+}
+
+.btn-login {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #ff5722; /* Color personalizado para el botón */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}

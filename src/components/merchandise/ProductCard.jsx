@@ -3,17 +3,16 @@ import { Context } from "../../store/context";
 
 const ProductCard = () => {
   const { store, actions } = useContext(Context);
-  const [favoriteProducts, setFavoriteProducts] = useState([]); // Estado local para manejar los favoritos
+  const [favoriteProducts, setFavoriteProducts] = useState([]);
 
   useEffect(() => {
-    actions.requestCustomerProducts(); // Cargar productos
-    actions.getFavorites(); // Cargar favoritos desde el servidor
+    actions.requestCustomerProducts();
+    actions.getFavorites();
   }, []);
 
   useEffect(() => {
-    // Cuando se actualizan los favoritos en el store, ajustamos el estado local de los favoritos de productos
     const productFavorites = store.customerFavorites
-      .filter((fav) => fav.item_type_id === 2)  // '2' es para productos
+      .filter((fav) => fav.item_type_id === 2)
       .map((fav) => fav.item_id);
     setFavoriteProducts(productFavorites);
   }, [store.customerFavorites]);
@@ -21,13 +20,11 @@ const ProductCard = () => {
   const toggleFavorite = (product) => {
     const isFavorite = favoriteProducts.includes(product.id);
     if (isFavorite) {
-      // Eliminar de favoritos
-      actions.removeFavorite(product.id, 2); // Llamamos la acción para eliminar de favoritos, 2 es para productos
-      setFavoriteProducts(favoriteProducts.filter((id) => id !== product.id)); // Eliminar localmente
+      actions.removeFavorite(product.id, 2);
+      setFavoriteProducts(favoriteProducts.filter((id) => id !== product.id));
     } else {
-      // Agregar a favoritos
-      actions.addFavorite(product.id, 2); // '2' es el ID de 'product' en la tabla ItemType
-      setFavoriteProducts([...favoriteProducts, product.id]); // Agregar localmente
+      actions.addFavorite(product.id, 2);
+      setFavoriteProducts([...favoriteProducts, product.id]);
     }
   };
 
@@ -37,10 +34,15 @@ const ProductCard = () => {
       <div className="row">
         {store.customerRequestProducts.map((product, index) => (
           <div key={index} className="col-md-4 mb-4">
-            <div className="card">
+            <div className="card card-producto">
+              <img
+                src={product.image_url} // Asegúrate de que tu producto tenga una propiedad image_url
+                className="card-img-top"
+                alt={product.name}
+              />
               <div className="card-body">
-                <h5 className="card-title">{product.name}</h5>  {/* Mostrar el nombre del producto */}
-                <p className="card-text">Precio: ${product.price}</p>  {/* Mostrar el precio */}
+                <h5 className="card-title">{product.name}</h5>
+                <p className="card-text">Precio: ${product.price}</p>
                 <button
                   className={`btn ${
                     favoriteProducts.includes(product.id)
