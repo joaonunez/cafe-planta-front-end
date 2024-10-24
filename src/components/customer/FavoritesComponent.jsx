@@ -9,18 +9,19 @@ const FavoritesComponent = () => {
   }, []);
 
   const productFavorites = store.customerFavorites
-    ? store.customerFavorites.filter((fav) => fav.item_type_id === 2)  // Productos
+    ? store.customerFavorites.filter((fav) => fav.item_type_id === 2) // Productos
     : [];
 
   const comboFavorites = store.customerFavorites
-    ? store.customerFavorites.filter((fav) => fav.item_type_id === 1)  // Combos
+    ? store.customerFavorites.filter((fav) => fav.item_type_id === 1) // Combos
     : [];
 
   return (
     <div className="container mt-5">
-      <h2>Mis Favoritos</h2>
+      <h2 className="text-center">Mis Favoritos</h2>
 
-      <ul className="nav nav-tabs" id="myTab" role="tablist">
+      {/* Alinear los nav-tabs al centro */}
+      <ul className="nav nav-tabs d-flex justify-content-center" id="myTab" role="tablist">
         <li className="nav-item" role="presentation">
           <button
             className="nav-link active"
@@ -59,7 +60,6 @@ const FavoritesComponent = () => {
           role="tabpanel"
           aria-labelledby="product-tab"
         >
-          <h3>Productos Favoritos</h3>
           <ul className="list-group">
             {productFavorites.length > 0 ? (
               productFavorites.map((favorite) => (
@@ -80,7 +80,6 @@ const FavoritesComponent = () => {
           role="tabpanel"
           aria-labelledby="combo-tab"
         >
-          <h3>Combos Favoritos</h3>
           <ul className="list-group">
             {comboFavorites.length > 0 ? (
               comboFavorites.map((favorite) => (

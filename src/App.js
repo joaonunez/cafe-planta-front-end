@@ -9,6 +9,7 @@ import CustomerNavbar from './components/customer/CustomerNavbar';
 import ManagerLoginView from './views/manager/login/ManagerLoginView';
 import Home from './views/home/Home';
 import CustomerLoginView from './views/customer/CustomerLoginView';
+import CustomerRegisterView from './views/customer/CustomerRegisterView';
 
 function App() {
   const { store } = React.useContext(Context);
@@ -28,7 +29,7 @@ function App() {
         <Route path='/favorites' element={<Favorites />} />
         <Route path='/purchase-history' element={<PurchaseHistory />} />
         <Route path='/manager-login' element={<ManagerLoginView />} />
-
+        <Route path='/register' element={<CustomerRegisterView />} />
 
       </Routes>
     </>

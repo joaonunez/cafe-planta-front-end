@@ -9,7 +9,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       customerFavorites: [],
     },
     actions: {
-      login: async (username, password) => {
+      loginCustomer: async (username, password) => {
         try {
           const response = await fetch(
             "http://localhost:3001/customer/login-customer",
@@ -47,7 +47,7 @@ const getState = ({ getActions, getStore, setStore }) => {
           return false;
         }
       },
-      logout: () => {
+      logoutCustomer: () => {
         setStore({
           user: null,
           token: null,
@@ -134,7 +134,7 @@ const getState = ({ getActions, getStore, setStore }) => {
           );
 
           const result = await response.json();
-
+          console.log(result);
           if (response.ok) {
             getActions().getFavorites(); // Refrescar la lista de favoritos
           } else {
@@ -161,7 +161,7 @@ const getState = ({ getActions, getStore, setStore }) => {
           );
 
           const result = await response.json();
-
+          console.log(result);
           if (response.ok) {
             getActions().getFavorites(); // Refrescar la lista de favoritos
           } else {
@@ -171,6 +171,30 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error al eliminar favorito: ", err);
         }
       },
+      registerCustomer: async (customerData) => {
+        try {
+            const response = await fetch("http://localhost:3001/customer/register-customer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(customerData),
+            });
+    
+            if (response.ok) {
+                return { success: true, message: 'Registro exitoso' }; // Devuelve un objeto con success y message
+            } else {
+                const errorData = await response.json();
+                console.error("Error al registrar el cliente:", errorData);
+                return { success: false, message: errorData.message || 'Error en el registro' }; // Devuelve un objeto con success y message
+            }
+        } catch (err) {
+            console.error("Error en la solicitud de registro:", err);
+            return { success: false, message: 'Error de red' }; // Devuelve un objeto con success y message
+        }
+    },
+
+
     },
   };
 };

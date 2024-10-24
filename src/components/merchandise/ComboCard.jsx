@@ -1,5 +1,6 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../../store/context";
+import Swal from "sweetalert2"; 
 
 const ComboCard = () => {
   const { store, actions } = useContext(Context);
@@ -20,22 +21,33 @@ const ComboCard = () => {
     setFavoriteCombos(comboFavorites);
   }, [store.customerFavorites]);
 
-  const toggleFavorite = (combo) => {
+  const toggleFavorite = async (combo) => {
     const isFavorite = favoriteCombos.includes(combo.id);
     if (isFavorite) {
-      // Eliminar de favoritos
-      actions.removeFavorite(combo.id, 1); // Usar '1' para 'combo_menu'
-      setFavoriteCombos(favoriteCombos.filter((id) => id !== combo.id));
+      await actions.removeFavorite(combo.id, 1); // Esperar a que se complete la eliminación
+      setFavoriteCombos((prev) => prev.filter((id) => id !== combo.id)); // Actualizar el estado
+      // Notificar que se eliminó el favorito
+      Swal.fire({
+        icon: 'warning', // Puedes usar 'warning' para el corazón roto
+        title: 'Favorito eliminado',
+        text: `Has eliminado el combo ${combo.name} de tus favoritos.`,
+        iconHtml: '💔', // Cambiar ícono a corazón roto
+      });
     } else {
-      // Agregar a favoritos
-      actions.addFavorite(combo.id, 1); // Usar '1' para 'combo_menu'
-      setFavoriteCombos([...favoriteCombos, combo.id]);
+      await actions.addFavorite(combo.id, 1); // Esperar a que se complete la adición
+      setFavoriteCombos((prev) => [...prev, combo.id]); // Actualizar el estado
+      // Notificar que se agregó el favorito
+      Swal.fire({
+        icon: 'success', // Mantener el ícono de éxito
+        title: 'Favorito agregado',
+        text: `Has agregado el combo ${combo.name} a tus favoritos.`,
+        iconHtml: '❤️', // Cambiar ícono a corazón lleno
+      });
     }
   };
 
   return (
     <div className="container">
-      <h1>Combos</h1>
       <div className="row">
         {store.customerRequestCombos.map((combo, index) => (
           <div key={index} className="col-md-4 mb-4">

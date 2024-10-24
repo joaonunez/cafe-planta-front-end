@@ -13,9 +13,6 @@ const ManagerLogin = () => {
             return;
         }
 
-        // Aquí puedes agregar la lógica para autenticar al gerente
-        console.log('Email:', email);
-        console.log('Password:', password);
 
         // Resetear el formulario
         setEmail('');

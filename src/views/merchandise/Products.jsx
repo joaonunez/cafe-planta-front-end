@@ -4,7 +4,7 @@ import ProductCard from '../../components/merchandise/ProductCard';
 const Products = () => {
   return (
     <div>
-      <h2>Productos Disponibles</h2>
+      <h2 className='text-center'>Productos Disponibles</h2>
       <ProductCard/>
     </div>
   );

@@ -1,36 +1,51 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../../store/context";
+import Swal from "sweetalert2"; // Importar SweetAlert2
 
 const ProductCard = () => {
   const { store, actions } = useContext(Context);
   const [favoriteProducts, setFavoriteProducts] = useState([]);
 
   useEffect(() => {
-    actions.requestCustomerProducts();
-    actions.getFavorites();
+    actions.requestCustomerProducts(); // Cargar productos
+    actions.getFavorites(); // Cargar favoritos desde el servidor
   }, []);
 
   useEffect(() => {
+    // Ajustar el estado local de los favoritos de productos
     const productFavorites = store.customerFavorites
-      .filter((fav) => fav.item_type_id === 2)
-      .map((fav) => fav.item_id);
+      ? store.customerFavorites
+          .filter((fav) => fav.item_type_id === 2) // '2' es el ID para 'product' en ItemType
+          .map((fav) => fav.item_id)
+      : [];
     setFavoriteProducts(productFavorites);
   }, [store.customerFavorites]);
 
-  const toggleFavorite = (product) => {
+  const toggleFavorite = async (product) => {
     const isFavorite = favoriteProducts.includes(product.id);
     if (isFavorite) {
-      actions.removeFavorite(product.id, 2);
-      setFavoriteProducts(favoriteProducts.filter((id) => id !== product.id));
+      await actions.removeFavorite(product.id, 2); // Esperar a que se complete la eliminación
+      setFavoriteProducts((prev) => prev.filter((id) => id !== product.id)); // Actualizar el estado
+      // Notificar que se eliminó el favorito
+      Swal.fire({
+        icon: 'success',
+        title: 'Favorito eliminado',
+        text: `Has eliminado el producto ${product.name} de tus favoritos.`,
+      });
     } else {
-      actions.addFavorite(product.id, 2);
-      setFavoriteProducts([...favoriteProducts, product.id]);
+      await actions.addFavorite(product.id, 2); // Esperar a que se complete la adición
+      setFavoriteProducts((prev) => [...prev, product.id]); // Actualizar el estado
+      // Notificar que se agregó el favorito
+      Swal.fire({
+        icon: 'success',
+        title: 'Favorito agregado',
+        text: `Has agregado el producto ${product.name} a tus favoritos.`,
+      });
     }
   };
 
   return (
     <div className="container">
-      <h1>Productos</h1>
       <div className="row">
         {store.customerRequestProducts.map((product, index) => (
           <div key={index} className="col-md-4 mb-4">

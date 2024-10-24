@@ -5,10 +5,10 @@ import { Context } from '../../store/context';
 const CustomerNavbar = () => {
   const { store, actions } = React.useContext(Context);
   const navigate = useNavigate();
-
+  
   const handleLogout = () => {
-    actions.logout();
-    navigate("/");
+    actions.logoutCustomer();
+    navigate("/login");
     window.location.reload(); // Refresca la página para actualizar la memoria
   };
 
