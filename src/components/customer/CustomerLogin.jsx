@@ -30,7 +30,7 @@ const CustomerLogin = () => {
     setTimeout(async () => {
       const success = await actions.loginCustomer(username, password);
       if (success) {
-        navigate("/combos");
+        navigate("/customer/combos");
       } else {
         Swal.fire({
           icon: 'error',

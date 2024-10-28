@@ -5,6 +5,7 @@ import Swal from "sweetalert2"; // Importar SweetAlert2
 const ProductCard = () => {
   const { store, actions } = useContext(Context);
   const [favoriteProducts, setFavoriteProducts] = useState([]);
+  const [loading, setLoading] = useState({}); // Estado para el spinner por producto
 
   useEffect(() => {
     actions.requestCustomerProducts(); // Cargar productos
@@ -24,24 +25,29 @@ const ProductCard = () => {
   const toggleFavorite = async (product) => {
     const isFavorite = favoriteProducts.includes(product.id);
     if (isFavorite) {
-      await actions.removeFavorite(product.id, 2); // Esperar a que se complete la eliminación
-      setFavoriteProducts((prev) => prev.filter((id) => id !== product.id)); // Actualizar el estado
-      // Notificar que se eliminó el favorito
+      await actions.removeFavorite(product.id, 2);
+      setFavoriteProducts((prev) => prev.filter((id) => id !== product.id));
       Swal.fire({
-        icon: 'success',
-        title: 'Favorito eliminado',
+        icon: "success",
+        title: "Favorito eliminado",
         text: `Has eliminado el producto ${product.name} de tus favoritos.`,
       });
     } else {
-      await actions.addFavorite(product.id, 2); // Esperar a que se complete la adición
-      setFavoriteProducts((prev) => [...prev, product.id]); // Actualizar el estado
-      // Notificar que se agregó el favorito
+      await actions.addFavorite(product.id, 2);
+      setFavoriteProducts((prev) => [...prev, product.id]);
       Swal.fire({
-        icon: 'success',
-        title: 'Favorito agregado',
+        icon: "success",
+        title: "Favorito agregado",
         text: `Has agregado el producto ${product.name} a tus favoritos.`,
       });
     }
+  };
+
+  const handleImageLoad = (productId) => {
+    setLoading((prevLoading) => ({
+      ...prevLoading,
+      [productId]: false, // Ocultar el spinner para este producto
+    }));
   };
 
   return (
@@ -50,11 +56,18 @@ const ProductCard = () => {
         {store.customerRequestProducts.map((product, index) => (
           <div key={index} className="col-md-4 mb-4">
             <div className="card card-producto">
-              <img
-                src={product.image_url} // Asegúrate de que tu producto tenga una propiedad image_url
-                className="card-img-top"
-                alt={product.name}
-              />
+              <div className="image-container" style={{ position: "relative" }}>
+                {loading[product.id] !== false && (
+                  <div className="spinner-border spinner" role="status" />
+                )}
+                <img
+                  src={product.image_url || "/path-to-default-image.jpg"} // Proporcionar una imagen por defecto
+                  className="card-img-top"
+                  alt={product.name}
+                  onLoad={() => handleImageLoad(product.id)} // Cuando la imagen se carga, oculta el spinner
+                  onError={() => handleImageLoad(product.id)} // En caso de error (imagen inválida), oculta el spinner
+                />
+              </div>
               <div className="card-body">
                 <h5 className="card-title">{product.name}</h5>
                 <p className="card-text">Precio: ${product.price}</p>

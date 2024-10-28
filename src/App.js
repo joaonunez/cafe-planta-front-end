@@ -1,38 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import injectContext, { Context } from './store/context';
-import Products from './views/merchandise/Products';
-import Favorites from './views/customer/Favorites';
-import PurchaseHistory from './views/customer/PurchaseHistory';
-import Combos from './views/merchandise/Combos';
-import CustomerNavbar from './components/customer/CustomerNavbar';
-import ManagerLoginView from './views/manager/login/ManagerLoginView';
 import Home from './views/home/Home';
 import CustomerLoginView from './views/customer/CustomerLoginView';
 import CustomerRegisterView from './views/customer/CustomerRegisterView';
+import ManagerLoginView from './views/manager/login/ManagerLoginView';
+import CustomerHome from './views/customer/CustomerHome'; // Importar la nueva vista
 
 function App() {
-  const { store } = React.useContext(Context);
+  const { store } = useContext(Context);
   const navigate = useNavigate();
 
+  // Redirige solo cuando se intenta acceder a rutas protegidas sin autenticación
   useEffect(() => {
+    if (!store.token && window.location.pathname.startsWith("/customer")) {
+      navigate('/login'); // Redirige a login si intenta acceder a rutas protegidas sin token
+    }
   }, [store.token, navigate]);
 
   return (
-    <>
-      {store.token && <CustomerNavbar />}  {/* Solo mostrar la navbar si está logueado */}
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/login' element={<CustomerLoginView />} />
-        <Route path='/combos' element={<Combos />} />
-        <Route path='/products' element={<Products />} />
-        <Route path='/favorites' element={<Favorites />} />
-        <Route path='/purchase-history' element={<PurchaseHistory />} />
-        <Route path='/manager-login' element={<ManagerLoginView />} />
-        <Route path='/register' element={<CustomerRegisterView />} />
-
-      </Routes>
-    </>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<CustomerLoginView />} />
+      <Route path="/register" element={<CustomerRegisterView />} />
+      <Route path="/manager-login" element={<ManagerLoginView />} />
+      
+      {/* Agrupar rutas de cliente bajo CustomerHome */}
+      <Route path="/customer/*" element={<CustomerHome />} />
+    </Routes>
   );
 }
 

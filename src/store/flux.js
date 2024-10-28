@@ -1,7 +1,7 @@
 const getState = ({ getActions, getStore, setStore }) => {
   return {
     store: {
-      user: JSON.parse(localStorage.getItem("user")) || null,
+      customer: JSON.parse(localStorage.getItem("customer")) || null,
       token: localStorage.getItem("token") || null,
       error: null,
       customerRequestProducts: [],
@@ -19,22 +19,22 @@ const getState = ({ getActions, getStore, setStore }) => {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({ username, password }),
-              credentials: "include", // Incluir cookies en la solicitud
+              credentials: "include",
             }
           );
 
           const result = await response.json();
 
           if (response.ok && result.token) {
-            // Guardar el usuario y token en el store
+            // Guardar el cliente y token en el store
             setStore({
-              user: result.customer,
+              customer: result.customer,  // Cambiamos 'user' a 'customer'
               token: result.token,
               error: null,
             });
 
             // Guardar en localStorage
-            localStorage.setItem("user", JSON.stringify(result.customer));
+            localStorage.setItem("customer", JSON.stringify(result.customer));
             localStorage.setItem("token", result.token);
             return true;
           } else {
@@ -49,10 +49,10 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       logoutCustomer: () => {
         setStore({
-          user: null,
+          customer: null,  // Cambiamos 'user' a 'customer'
           token: null,
         });
-        localStorage.removeItem("user");
+        localStorage.removeItem("customer");
         localStorage.removeItem("token");
       },
       requestCustomerProducts: async () => {
@@ -97,7 +97,7 @@ const getState = ({ getActions, getStore, setStore }) => {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
-              credentials: "include", // Incluir cookies en la solicitud
+              credentials: "include",
             }
           );
 
@@ -107,8 +107,6 @@ const getState = ({ getActions, getStore, setStore }) => {
             setStore({ customerFavorites: favorites });
           } else {
             console.error("Error al obtener favoritos: ", favorites.error);
-            console.log(getStore().customerFavorites);
-
           }
         } catch (err) {
           console.error("Error al obtener favoritos: ", err);
@@ -173,26 +171,29 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       registerCustomer: async (customerData) => {
         try {
-            const response = await fetch("http://localhost:3001/customer/register-customer", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(customerData),
-            });
-    
-            if (response.ok) {
-                return { success: true, message: 'Registro exitoso' }; // Devuelve un objeto con success y message
-            } else {
-                const errorData = await response.json();
-                console.error("Error al registrar el cliente:", errorData);
-                return { success: false, message: errorData.message || 'Error en el registro' }; // Devuelve un objeto con success y message
+          const response = await fetch(
+            "http://localhost:3001/customer/register-customer",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(customerData),
             }
+          );
+
+          if (response.ok) {
+            return { success: true, message: 'Registro exitoso' };
+          } else {
+            const errorData = await response.json();
+            console.error("Error al registrar el cliente:", errorData);
+            return { success: false, message: errorData.message || 'Error en el registro' };
+          }
         } catch (err) {
-            console.error("Error en la solicitud de registro:", err);
-            return { success: false, message: 'Error de red' }; // Devuelve un objeto con success y message
+          console.error("Error en la solicitud de registro:", err);
+          return { success: false, message: 'Error de red' };
         }
-    },
+      },
 
 
     },
