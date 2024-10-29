@@ -5,11 +5,17 @@ import Swal from "sweetalert2"; // Importar SweetAlert2
 const ProductCard = () => {
   const { store, actions } = useContext(Context);
   const [favoriteProducts, setFavoriteProducts] = useState([]);
-  const [loading, setLoading] = useState({}); // Estado para el spinner por producto
+  const [loading, setLoading] = useState(true); // Estado para el spinner de toda la sección
+  const [imageLoading, setImageLoading] = useState({}); // Estado para el spinner por producto
 
   useEffect(() => {
-    actions.requestCustomerProducts(); // Cargar productos
-    actions.getFavorites(); // Cargar favoritos desde el servidor
+    const loadProductsAndFavorites = async () => {
+      await actions.requestCustomerProducts(); // Cargar productos
+      await actions.getFavorites(); // Cargar favoritos desde el servidor
+      setLoading(false); // Desactivar spinner general una vez que se carguen los datos
+    };
+
+    loadProductsAndFavorites();
   }, []);
 
   useEffect(() => {
@@ -44,11 +50,31 @@ const ProductCard = () => {
   };
 
   const handleImageLoad = (productId) => {
-    setLoading((prevLoading) => ({
+    setImageLoading((prevLoading) => ({
       ...prevLoading,
       [productId]: false, // Ocultar el spinner para este producto
     }));
   };
+
+  const addToCart = (product) => {
+    actions.addToCart(product.id, 2); // `2` es el item_type_id para productos
+    Swal.fire({
+      icon: "success",
+      title: "Añadido al carrito",
+      text: `El producto ${product.name} ha sido añadido al carrito.`,
+    });
+  };
+
+  if (loading) {
+    // Mostrar spinner de carga general mientras se cargan productos y favoritos
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -57,7 +83,7 @@ const ProductCard = () => {
           <div key={index} className="col-md-4 mb-4">
             <div className="card card-producto">
               <div className="image-container" style={{ position: "relative" }}>
-                {loading[product.id] !== false && (
+                {imageLoading[product.id] !== false && (
                   <div className="spinner-border spinner" role="status" />
                 )}
                 <img
@@ -65,7 +91,7 @@ const ProductCard = () => {
                   className="card-img-top"
                   alt={product.name}
                   onLoad={() => handleImageLoad(product.id)} // Cuando la imagen se carga, oculta el spinner
-                  onError={() => handleImageLoad(product.id)} // En caso de error (imagen inválida), oculta el spinner
+                  onError={() => handleImageLoad(product.id)} // En caso de error, oculta el spinner
                 />
               </div>
               <div className="card-body">
@@ -80,6 +106,12 @@ const ProductCard = () => {
                   onClick={() => toggleFavorite(product)}
                 >
                   {favoriteProducts.includes(product.id) ? "♥" : "♡"}
+                </button>
+                <button
+                  className="btn btn-primary ms-2"
+                  onClick={() => addToCart(product)}
+                >
+                  Añadir al Carrito
                 </button>
               </div>
             </div>

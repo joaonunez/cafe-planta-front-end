@@ -7,6 +7,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       customerRequestProducts: [],
       customerRequestCombos: [],
       customerFavorites: [],
+      cart: [],
     },
     actions: {
       loginCustomer: async (username, password) => {
@@ -194,6 +195,60 @@ const getState = ({ getActions, getStore, setStore }) => {
           return { success: false, message: 'Error de red' };
         }
       },
+      addToCart: async (item_id, item_type_id, quantity = 1) => {
+        const store = getStore();
+        const token = store.token;
+    
+        try {
+            const response = await fetch("http://localhost:3001/cart/add_item", { 
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                credentials: "include", // Asegura que se envíen las credenciales con la solicitud
+                body: JSON.stringify({
+                    item_id: item_id,
+                    item_type_id: item_type_id,
+                    quantity: quantity
+                })
+            });
+    
+            if (!response.ok) throw new Error("Failed to add item to cart");
+    
+            const data = await response.json();
+            
+            // Actualiza el store si es necesario
+            setStore({ cart: data.cart });
+    
+            console.log("Item added to cart:", data);
+        } catch (error) {
+            console.error("Error adding item to cart:", error);
+        }
+    },
+    getCartItems: async () => {
+      const store = getStore();
+      const token = store.token;
+
+      try {
+        const response = await fetch("http://localhost:3001/cart/get_items", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include", // Enviar credenciales con la solicitud
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch cart items");
+
+        const data = await response.json();
+        setStore({ cart: data.cart });
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+      }
+    },
+    
+    
 
 
     },
