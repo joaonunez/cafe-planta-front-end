@@ -1,28 +1,44 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation } from 'react-router-dom';
 import { Context } from '../../store/context';
-import { FaBoxOpen, FaShoppingBasket } from 'react-icons/fa';
+import { FaBoxOpen, FaShoppingBasket, FaShoppingCart } from 'react-icons/fa';
 import Combos from '../merchandise/Combos';
 import Products from '../merchandise/Products';
 import Favorites from '../customer/Favorites';
 import PurchaseHistory from '../customer/PurchaseHistory';
 import CustomerNavbar from '../../components/customer/CustomerNavbar';
-import Cart from '../../components/customer/Cart';
+import Cart from '../../components/merchandise/Cart';
 
 const CustomerHome = () => {
-  const { store } = useContext(Context);
+  const { store, actions } = useContext(Context);
   const navigate = useNavigate();
   const location = useLocation();
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   useEffect(() => {
     if (!store.token) {
       navigate('/login'); // Redirige a login solo si no hay token
+    } else {
+      actions.getCartItems(); // Cargar ítems del carrito al cargar la página
     }
   }, [store.token, navigate]);
 
+  useEffect(() => {
+    // Actualizar el conteo de ítems distintos en el carrito cuando store.cart cambie
+    setCartItemCount(store.cart ? store.cart.length : 0);
+  }, [store.cart]);
+
   return (
     <>
-      {store.token && <CustomerNavbar />} {/* Solo mostrar el navbar si está logueado */}
+      {store.token && <CustomerNavbar />}
+
+      {/* Mostrar el botón flotante del carrito solo si hay ítems en el carrito */}
+      {cartItemCount > 0 && (
+        <Link to="/customer/cart" className="cart-float-button">
+          <FaShoppingCart size={24} />
+          <span>{cartItemCount}</span>
+        </Link>
+      )}
 
       {/* Mostrar mensaje de bienvenida solo en la ruta "/customer" */}
       {location.pathname === "/customer" && store.customer && (

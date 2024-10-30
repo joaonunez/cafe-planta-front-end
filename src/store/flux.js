@@ -247,6 +247,56 @@ const getState = ({ getActions, getStore, setStore }) => {
         console.error("Error fetching cart items:", error);
       }
     },
+    removeFromCart: async (itemId) => {
+      const store = getStore();
+      const token = store.token;
+
+      try {
+        const response = await fetch(`http://localhost:3001/cart/delete_item/${itemId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to delete item from cart");
+
+        // Actualizar el carrito en el store después de la eliminación
+        const updatedCart = store.cart.filter((item) => item.id !== itemId);
+        setStore({ cart: updatedCart });
+      } catch (error) {
+        console.error("Error deleting item from cart:", error);
+      }
+    },
+    updateCartItemQuantity: async (itemId, newQuantity) => {
+      const store = getStore();
+      const token = store.token;
+
+      try {
+        const response = await fetch(`http://localhost:3001/cart/update_item/${itemId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({ quantity: newQuantity }),
+        });
+
+        if (!response.ok) throw new Error("Failed to update item quantity");
+
+        const data = await response.json();
+
+        // Actualizar la cantidad en el carrito del store
+        const updatedCart = store.cart.map((item) =>
+          item.id === itemId ? { ...item, quantity: data.quantity } : item
+        );
+        setStore({ cart: updatedCart });
+      } catch (error) {
+        console.error("Error updating item quantity:", error);
+      }
+    },
     
     
 

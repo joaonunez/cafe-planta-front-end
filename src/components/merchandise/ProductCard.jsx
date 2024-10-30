@@ -96,21 +96,16 @@ const ProductCard = () => {
               </div>
               <div className="card-body">
                 <h5 className="card-title">{product.name}</h5>
-                <p className="card-text">Precio: ${product.price}</p>
+                <p className="card-text">Precio: ${product.price.toLocaleString("es-CL")}</p>
                 <button
                   className={`btn ${
-                    favoriteProducts.includes(product.id)
-                      ? "btn-danger"
-                      : "btn-outline-danger"
+                    favoriteProducts.includes(product.id) ? "btn-danger" : "btn-outline-danger"
                   }`}
                   onClick={() => toggleFavorite(product)}
                 >
                   {favoriteProducts.includes(product.id) ? "♥" : "♡"}
                 </button>
-                <button
-                  className="btn btn-primary ms-2"
-                  onClick={() => addToCart(product)}
-                >
+                <button className="btn btn-primary ms-2" onClick={() => addToCart(product)}>
                   Añadir al Carrito
                 </button>
               </div>

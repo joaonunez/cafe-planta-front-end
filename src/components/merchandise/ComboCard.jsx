@@ -97,22 +97,17 @@ const ComboCard = () => {
                 />
               </div>
               <div className="card-body">
-                <h5 className="card-title">{combo.name}</h5> {/* Mostrar el nombre del combo */}
-                <p className="card-text">Precio: ${combo.price}</p> {/* Mostrar el precio */}
+                <h5 className="card-title">{combo.name}</h5>
+                <p className="card-text">Precio: ${combo.price.toLocaleString("es-CL")}</p>
                 <button
                   className={`btn ${
-                    favoriteCombos.includes(combo.id)
-                      ? "btn-danger"
-                      : "btn-outline-danger"
+                    favoriteCombos.includes(combo.id) ? "btn-danger" : "btn-outline-danger"
                   }`}
                   onClick={() => toggleFavorite(combo)}
                 >
                   {favoriteCombos.includes(combo.id) ? "♥" : "♡"}
                 </button>
-                <button
-                  className="btn btn-primary mt-2"
-                  onClick={() => addToCart(combo)}
-                >
+                <button className="btn btn-primary mt-2" onClick={() => addToCart(combo)}>
                   Añadir al Carrito
                 </button>
               </div>

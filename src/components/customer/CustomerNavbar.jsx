@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Context } from '../../store/context';
+import { FaShoppingCart } from 'react-icons/fa';
 import logo from '../../assets/images/logo/logo.jpg';
 
 const CustomerNavbar = () => {
@@ -38,8 +39,8 @@ const CustomerNavbar = () => {
             </li>
           </ul>
           <div className="d-flex align-items-center">
-            <Link to="/customer/cart" className="btn btn-outline-primary me-3">
-              <i className="fa fa-shopping-cart"></i> Carrito
+            <Link to="/customer/cart" className="btn btn-outline-primary me-3 d-flex align-items-center">
+              <FaShoppingCart size={20} /> {/* Ícono de carrito */}
             </Link>
             {store.customer ? (
               <div className="d-flex flex-column flex-lg-row align-items-center">

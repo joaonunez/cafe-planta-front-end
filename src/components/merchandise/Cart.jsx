@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../../store/context";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
+import { FaPlus, FaMinus } from "react-icons/fa"; // Importar íconos
 
 const Cart = () => {
   const { store, actions } = useContext(Context);
@@ -17,6 +18,17 @@ const Cart = () => {
     setCartItems(Array.isArray(store.cart) ? store.cart : []);
   }, [store.cart]);
 
+  const handleQuantityChange = (item, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    actions.updateCartItemQuantity(item.id, newQuantity);
+    setCartItems((prevItems) =>
+      prevItems.map((cartItem) =>
+        cartItem.id === item.id ? { ...cartItem, quantity: newQuantity } : cartItem
+      )
+    );
+  };
+
   const handleRemoveItem = (item) => {
     Swal.fire({
       title: "¿Eliminar del carrito?",
@@ -28,7 +40,6 @@ const Cart = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         actions.removeFromCart(item.id);
-        setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id));
         Swal.fire("Eliminado", `"${item.name}" ha sido eliminado del carrito.`, "success");
       }
     });
@@ -57,8 +68,27 @@ const Cart = () => {
                 />
                 <div className="card-body">
                   <h5 className="card-title">{item.name}</h5>
-                  <p className="card-text">Precio: ${item.price}</p>
-                  <p className="card-text">Cantidad: {item.quantity}</p>
+                  <p className="card-text">
+                    Precio: ${item.price.toLocaleString("es-CL")}
+                  </p>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span>Cantidad:</span>
+                    <div className="d-flex align-items-center">
+                      <button
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => handleQuantityChange(item, item.quantity - 1)}
+                      >
+                        <FaMinus />
+                      </button>
+                      <span className="mx-2">{item.quantity}</span>
+                      <button
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => handleQuantityChange(item, item.quantity + 1)}
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
+                  </div>
                   <button
                     className="btn btn-danger mt-2 w-100"
                     onClick={() => handleRemoveItem(item)}
@@ -73,7 +103,7 @@ const Cart = () => {
       )}
       {cartItems.length > 0 && (
         <div className="mt-4">
-          <h4>Total: ${totalPrice.toFixed(2)}</h4>
+          <h4>Total: ${totalPrice.toLocaleString("es-CL")}</h4>
           <button className="btn btn-primary w-100">Proceder al Pago</button>
         </div>
       )}
