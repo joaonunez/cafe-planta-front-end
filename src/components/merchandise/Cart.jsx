@@ -1,26 +1,25 @@
+// Cart.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../../store/context";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { FaPlus, FaMinus } from "react-icons/fa"; // Importar íconos
+import { FaPlus, FaMinus } from "react-icons/fa";
 
 const Cart = () => {
   const { store, actions } = useContext(Context);
   const [cartItems, setCartItems] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Llamar a la función para obtener los items del carrito desde el backend
     actions.getCartItems();
   }, []);
 
   useEffect(() => {
-    // Actualizar el estado local cuando el carrito en el store cambie
     setCartItems(Array.isArray(store.cart) ? store.cart : []);
   }, [store.cart]);
 
   const handleQuantityChange = (item, newQuantity) => {
     if (newQuantity < 1) return;
-
     actions.updateCartItemQuantity(item.id, newQuantity);
     setCartItems((prevItems) =>
       prevItems.map((cartItem) =>
@@ -46,6 +45,16 @@ const Cart = () => {
   };
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const handlePurchase = async () => {
+    const success = await actions.createSale(totalPrice, "", cartItems);
+    if (success) {
+      Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
+      navigate("/customer/purchase-history");
+    } else {
+      Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+    }
+  };
 
   return (
     <div className="container mt-4">
@@ -104,7 +113,9 @@ const Cart = () => {
       {cartItems.length > 0 && (
         <div className="mt-4">
           <h4>Total: ${totalPrice.toLocaleString("es-CL")}</h4>
-          <button className="btn btn-primary w-100">Proceder al Pago</button>
+          <button className="btn btn-primary w-100" onClick={handlePurchase}>
+            Comprar
+          </button>
         </div>
       )}
     </div>

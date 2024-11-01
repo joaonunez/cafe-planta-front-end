@@ -35,7 +35,7 @@ const CustomerNavbar = () => {
               <Link className="nav-link" to="/customer/favorites">Favoritos</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/customer/purchase-history">Historial de Compras</Link>
+              <Link className="nav-link" to="/customer/purchase-history">Mis pedidos</Link>
             </li>
           </ul>
           <div className="d-flex align-items-center">

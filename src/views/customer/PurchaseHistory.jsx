@@ -1,10 +1,11 @@
 import React from 'react';
+import CustomerOrder from '../../components/customer/CustomerOrder';
 
 const PurchaseHistory = () => {
   return (
     <div>
       <h2>Historial de Compras</h2>
-      <p>Aquí puedes ver el historial de todas tus compras realizadas en la cafetería.</p>
+      <CustomerOrder/>
     </div>
   );
 };
