@@ -302,7 +302,6 @@ const getState = ({ getActions, getStore, setStore }) => {
       createSale: async (totalAmount, comments) => {
         const { token, cartId } = getStore();
 
-        // Verificamos si `cartId` está en el store antes de continuar
         if (!cartId) {
           console.error("Error: No se encontró cartId en el store.");
           return false;
@@ -319,14 +318,16 @@ const getState = ({ getActions, getStore, setStore }) => {
             body: JSON.stringify({
               total_amount: totalAmount,
               comments,
-              cart_id: cartId, // Usamos el `cartId` almacenado en el store
+              cart_id: cartId,
             }),
           });
 
           if (!response.ok) throw new Error("Failed to create sale");
 
           const data = await response.json();
-          setStore({ cart: [] }); // Limpiar carrito después de compra
+          setStore({ cart: [] });
+          await getActions().clearCartItems();
+          await getActions().deleteCart();
           return true;
         } catch (error) {
           console.error("Error creating sale:", error);
@@ -334,6 +335,47 @@ const getState = ({ getActions, getStore, setStore }) => {
         }
       },
 
+
+
+      clearCartItems: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/cart/clear_items", {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Failed to clear cart items");
+
+          return true;
+        } catch (error) {
+          console.error("Error clearing cart items:", error);
+          return false;
+        }
+      },
+
+      deleteCart: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/cart/delete", {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Failed to delete cart");
+
+          return true;
+        } catch (error) {
+          console.error("Error deleting cart:", error);
+          return false;
+        }
+      },
 
       getLatestOrder: async () => {
         const { token } = getStore();
@@ -355,6 +397,27 @@ const getState = ({ getActions, getStore, setStore }) => {
           return null;
         }
       },
+      getOrderDetails: async (saleId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/order_details/${saleId}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+      
+          if (!response.ok) throw new Error("Failed to fetch order details");
+      
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+          return null;
+        }
+      },
+    
     },
   };
 };
