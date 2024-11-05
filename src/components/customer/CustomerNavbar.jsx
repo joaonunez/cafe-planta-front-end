@@ -8,10 +8,13 @@ const CustomerNavbar = () => {
   const { store, actions } = React.useContext(Context);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    actions.logoutCustomer();
-    navigate("/login");
-    window.location.reload();
+  const handleLogout = async () => {
+    const success = await actions.logoutCustomer();
+    if (success) {
+      navigate("/customer-login"); // Redirige a la página de login de cliente
+    } else {
+      console.error("Error al intentar cerrar sesión del cliente.");
+    }
   };
 
   return (

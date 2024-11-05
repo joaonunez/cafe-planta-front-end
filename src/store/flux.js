@@ -15,31 +15,23 @@ const getState = ({ getActions, getStore, setStore }) => {
       productCategories: [],
     },
     actions: {
+      // ------------------------------------
+      // AUTH - Autenticación
+      // ------------------------------------
       loginCustomer: async (username, password) => {
         try {
-          const response = await fetch(
-            "http://localhost:3001/customer/login-customer",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ username, password }),
-              credentials: "include",
-            }
-          );
-
+          const response = await fetch("http://localhost:3001/customer/login-customer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: "include",
+          });
           const result = await response.json();
 
           if (response.ok && result.token) {
-            // Guardar el cliente y token en el store
-            setStore({
-              customer: result.customer, 
-              token: result.token,
-              error: null,
-            });
-
-            // Guardar en localStorage
+            setStore({ customer: result.customer, token: result.token, error: null });
             localStorage.setItem("customer", JSON.stringify(result.customer));
             localStorage.setItem("token", result.token);
             return true;
@@ -54,223 +46,160 @@ const getState = ({ getActions, getStore, setStore }) => {
         }
       },
 
-      logoutCustomer: () => {
-        setStore({
-          customer: null,
-          token: null,
-        });
-        localStorage.removeItem("customer");
-        localStorage.removeItem("token");
-      },
-
-      requestCustomerProducts: async () => {
+      logoutCustomer: async () => {
         try {
-          const response = await fetch(
-            "http://localhost:3001/product/customer-request-products"
-          );
-          const data = await response.json();
+          const response = await fetch("http://localhost:3001/customer/logout-customer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
 
           if (response.ok) {
-            setStore({ customerRequestProducts: data });
+            setStore({ customer: null, token: null });
+            localStorage.removeItem("customer");
+            localStorage.removeItem("token");
+            return true;
           } else {
-            console.error("Error al obtener productos: ", data);
+            console.error("Error al cerrar sesión del cliente");
+            return false;
           }
-        } catch (err) {
-          console.error("Error en requestCustomerProducts: ", err);
+        } catch (error) {
+          console.error("Error de red al intentar cerrar sesión:", error);
+          return false;
         }
       },
 
-      requestCustomerCombos: async () => {
+      loginAdmin: async (username, password) => {
         try {
-          const response = await fetch(
-            "http://localhost:3001/combo_menu/customer-request-combos"
-          );
-          const data = await response.json();
-
-          if (response.ok) {
-            setStore({ customerRequestCombos: data });
-          } else {
-            console.error("Error al obtener combos: ", data);
-          }
-        } catch (err) {
-          console.error("Error en requestCustomerCombos: ", err);
-        }
-      },
-
-      getFavorites: async () => {
-        const { token } = getStore();
-        try {
-          const response = await fetch(
-            "http://localhost:3001/favorite/list-favorites-customer",
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-              credentials: "include",
-            }
-          );
-
-          const favorites = await response.json();
-
-          if (response.ok) {
-            setStore({ customerFavorites: favorites });
-          } else {
-            console.error("Error al obtener favoritos: ", favorites.error);
-          }
-        } catch (err) {
-          console.error("Error al obtener favoritos: ", err);
-        }
-      },
-
-      addFavorite: async (itemId, itemTypeId) => {
-        const { token } = getStore();
-        try {
-          const response = await fetch(
-            "http://localhost:3001/favorite/add-to-favorites-customer",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                item_id: itemId,
-                item_type_id: itemTypeId,
-              }),
-              credentials: "include",
-            }
-          );
-
+          const response = await fetch("http://localhost:3001/user/admin-login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: "include",
+          });
           const result = await response.json();
-          if (response.ok) {
-            getActions().getFavorites(); // Refrescar la lista de favoritos
+
+          if (response.ok && result.token) {
+            setStore({ admin: result.user, token: result.token, error: null });
+            localStorage.setItem("admin", JSON.stringify(result.user));
+            localStorage.setItem("token", result.token);
+            return true;
           } else {
-            console.error("Error al agregar favorito: ", result.error);
+            setStore({ error: result.error });
+            return false;
           }
         } catch (err) {
-          console.error("Error al agregar favorito: ", err);
+          console.error("Error en la solicitud:", err);
+          setStore({ error: "Error de conexión. Intenta nuevamente." });
+          return false;
         }
       },
 
-      removeFavorite: async (itemId, itemTypeId) => {
-        const { token } = getStore();
+      logoutAdmin: async () => {
         try {
-          const response = await fetch(
-            "http://localhost:3001/favorite/remove-favorite-customer",
-            {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ item_id: itemId, item_type_id: itemTypeId }),
-              credentials: "include",
-            }
-          );
+          const response = await fetch("http://localhost:3001/user/logout-admin", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
 
-          const result = await response.json();
           if (response.ok) {
-            getActions().getFavorites(); // Refrescar la lista de favoritos
+            setStore({ admin: null, token: null });
+            localStorage.removeItem("admin");
+            localStorage.removeItem("token");
+            return true;
           } else {
-            console.error("Error al eliminar favorito: ", result.error);
+            console.error("Error al cerrar sesión del administrador");
+            return false;
           }
-        } catch (err) {
-          console.error("Error al eliminar favorito: ", err);
+        } catch (error) {
+          console.error("Error de red al intentar cerrar sesión:", error);
+          return false;
         }
       },
 
       registerCustomer: async (customerData) => {
         try {
-          const response = await fetch(
-            "http://localhost:3001/customer/register-customer",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(customerData),
-            }
-          );
+          const response = await fetch("http://localhost:3001/customer/register-customer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(customerData),
+          });
 
           if (response.ok) {
-            return { success: true, message: 'Registro exitoso' };
+            return { success: true, message: "Registro exitoso" };
           } else {
             const errorData = await response.json();
             console.error("Error al registrar el cliente:", errorData);
-            return { success: false, message: errorData.message || 'Error en el registro' };
+            return { success: false, message: errorData.message || "Error en el registro" };
           }
         } catch (err) {
           console.error("Error en la solicitud de registro:", err);
-          return { success: false, message: 'Error de red' };
+          return { success: false, message: "Error de red" };
         }
       },
 
+      // ------------------------------------
+      // CART - Carrito
+      // ------------------------------------
       addToCart: async (item_id, item_type_id, quantity = 1) => {
         const { token } = getStore();
 
         try {
-          const response = await fetch("http://localhost:3001/cart/add_item", { 
+          const response = await fetch("http://localhost:3001/cart/add_item", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
             credentials: "include",
-            body: JSON.stringify({
-              item_id: item_id,
-              item_type_id: item_type_id,
-              quantity: quantity
-            })
+            body: JSON.stringify({ item_id, item_type_id, quantity }),
           });
 
           if (!response.ok) throw new Error("Failed to add item to cart");
-
           const data = await response.json();
           setStore({ cart: data.cart });
-
         } catch (error) {
           console.error("Error adding item to cart:", error);
         }
       },
+
       getCartItems: async () => {
         const { token } = getStore();
         try {
           const response = await fetch("http://localhost:3001/cart/get_items", {
             method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
           });
 
           if (!response.ok) throw new Error("Failed to fetch cart items");
-
           const data = await response.json();
-          console.log("Cart items fetched:", data);  // Verifica el contenido completo de `data`
-
-          // Si el carrito no está vacío, obtenemos el `cart_id` del primer elemento
           const cartId = data.cart.length > 0 ? data.cart[0].cart_id : null;
-          setStore({ cart: data.cart, cartId }); // Guardar `cartId` en el store
-          
+          setStore({ cart: data.cart, cartId });
         } catch (error) {
           console.error("Error fetching cart items:", error);
         }
       },
+
       removeFromCart: async (itemId) => {
         const { token, cart } = getStore();
-
         try {
           const response = await fetch(`http://localhost:3001/cart/delete_item/${itemId}`, {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
           });
 
           if (!response.ok) throw new Error("Failed to delete item from cart");
-
           const updatedCart = cart.filter((item) => item.id !== itemId);
           setStore({ cart: updatedCart });
         } catch (error) {
@@ -280,7 +209,6 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       updateCartItemQuantity: async (itemId, newQuantity) => {
         const { token, cart } = getStore();
-
         try {
           const response = await fetch(`http://localhost:3001/cart/update_item/${itemId}`, {
             method: "PUT",
@@ -293,7 +221,6 @@ const getState = ({ getActions, getStore, setStore }) => {
           });
 
           if (!response.ok) throw new Error("Failed to update item quantity");
-
           const data = await response.json();
           const updatedCart = cart.map((item) =>
             item.id === itemId ? { ...item, quantity: data.quantity } : item
@@ -303,6 +230,115 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error updating item quantity:", error);
         }
       },
+
+      clearCartItems: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/cart/clear_items", {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Failed to clear cart items");
+          return true;
+        } catch (error) {
+          console.error("Error clearing cart items:", error);
+          return false;
+        }
+      },
+
+      deleteCart: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/cart/delete", {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Failed to delete cart");
+          return true;
+        } catch (error) {
+          console.error("Error deleting cart:", error);
+          return false;
+        }
+      },
+
+      // ------------------------------------
+      // FAVORITES - Favoritos
+      // ------------------------------------
+      getFavorites: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/favorite/list-favorites-customer", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+
+          const favorites = await response.json();
+          if (response.ok) {
+            setStore({ customerFavorites: favorites });
+          } else {
+            console.error("Error al obtener favoritos:", favorites.error);
+          }
+        } catch (err) {
+          console.error("Error al obtener favoritos:", err);
+        }
+      },
+
+      addFavorite: async (itemId, itemTypeId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/favorite/add-to-favorites-customer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ item_id: itemId, item_type_id: itemTypeId }),
+            credentials: "include",
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            getActions().getFavorites();
+          } else {
+            console.error("Error al agregar favorito:", result.error);
+          }
+        } catch (err) {
+          console.error("Error al agregar favorito:", err);
+        }
+      },
+
+      removeFavorite: async (itemId, itemTypeId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/favorite/remove-favorite-customer", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ item_id: itemId, item_type_id: itemTypeId }),
+            credentials: "include",
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            getActions().getFavorites();
+          } else {
+            console.error("Error al eliminar favorito:", result.error);
+          }
+        } catch (err) {
+          console.error("Error al eliminar favorito:", err);
+        }
+      },
+
+      // ------------------------------------
+      // SALES - Ventas
+      // ------------------------------------
       createSale: async (totalAmount, comments) => {
         const { token, cartId } = getStore();
 
@@ -319,15 +355,10 @@ const getState = ({ getActions, getStore, setStore }) => {
               Authorization: `Bearer ${token}`,
             },
             credentials: "include",
-            body: JSON.stringify({
-              total_amount: totalAmount,
-              comments,
-              cart_id: cartId,
-            }),
+            body: JSON.stringify({ total_amount: totalAmount, comments, cart_id: cartId }),
           });
 
           if (!response.ok) throw new Error("Failed to create sale");
-
           const data = await response.json();
           setStore({ cart: [] });
           await getActions().clearCartItems();
@@ -339,61 +370,16 @@ const getState = ({ getActions, getStore, setStore }) => {
         }
       },
 
-
-
-      clearCartItems: async () => {
-        const { token } = getStore();
-        try {
-          const response = await fetch("http://localhost:3001/cart/clear_items", {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
-          });
-
-          if (!response.ok) throw new Error("Failed to clear cart items");
-
-          return true;
-        } catch (error) {
-          console.error("Error clearing cart items:", error);
-          return false;
-        }
-      },
-
-      deleteCart: async () => {
-        const { token } = getStore();
-        try {
-          const response = await fetch("http://localhost:3001/cart/delete", {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
-          });
-
-          if (!response.ok) throw new Error("Failed to delete cart");
-
-          return true;
-        } catch (error) {
-          console.error("Error deleting cart:", error);
-          return false;
-        }
-      },
-
       getLatestOrder: async () => {
         const { token } = getStore();
         try {
           const response = await fetch("http://localhost:3001/sale/latest", {
             method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
           });
 
           if (!response.ok) throw new Error("Failed to fetch latest order");
-
           const data = await response.json();
           return data;
         } catch (error) {
@@ -401,19 +387,17 @@ const getState = ({ getActions, getStore, setStore }) => {
           return null;
         }
       },
+
       getOrderDetails: async (saleId) => {
         const { token } = getStore();
         try {
           const response = await fetch(`http://localhost:3001/sale/order_details/${saleId}`, {
             method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
           });
-      
+
           if (!response.ok) throw new Error("Failed to fetch order details");
-      
           const data = await response.json();
           return data;
         } catch (error) {
@@ -421,72 +405,48 @@ const getState = ({ getActions, getStore, setStore }) => {
           return null;
         }
       },
-      loginAdmin: async (username, password) => {
+
+      // ------------------------------------
+      // PRODUCT MANAGEMENT - Gestión de Productos
+      // ------------------------------------
+      requestCustomerProducts: async () => {
         try {
-          const response = await fetch("http://localhost:3001/user/admin-login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username, password }),
-            credentials: "include",
-          });
-
-          const result = await response.json();
-
-          if (response.ok && result.token) {
-            // Guardar el administrador y token en el store
-            setStore({
-              admin: result.user, 
-              token: result.token,
-              error: null,
-            });
-
-            // Guardar en localStorage
-            localStorage.setItem("admin", JSON.stringify(result.user));
-            localStorage.setItem("token", result.token);
-            return true;
-          } else {
-            setStore({ error: result.error });
-            return false;
-          }
-        } catch (err) {
-          console.error("Error en la solicitud:", err);
-          setStore({ error: "Error de conexión. Intenta nuevamente." });
-          return false;
-        }
-      },
-
-      logoutAdmin: () => {
-        setStore({
-          admin: null,
-          token: null,
-        });
-        localStorage.removeItem("admin");
-        localStorage.removeItem("token");
-      },
-      fetchUsersOnSystem: async () => {
-        try {
-          const response = await fetch("http://localhost:3001/user/get_users_on_system");
+          const response = await fetch("http://localhost:3001/product/customer-request-products");
           const data = await response.json();
+
           if (response.ok) {
-            setStore({ queriedUsers: data });
+            setStore({ customerRequestProducts: data });
           } else {
-            console.error("Error al obtener los usuarios: ", data);
+            console.error("Error al obtener productos:", data);
           }
         } catch (err) {
-          console.error("Error en fetchUsersOnSystem:", err);
+          console.error("Error en requestCustomerProducts:", err);
         }
       },
+
+      requestCustomerCombos: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/combo_menu/customer-request-combos");
+          const data = await response.json();
+
+          if (response.ok) {
+            setStore({ customerRequestCombos: data });
+          } else {
+            console.error("Error al obtener combos:", data);
+          }
+        } catch (err) {
+          console.error("Error en requestCustomerCombos:", err);
+        }
+      },
+
       fetchAdminProducts: async () => {
         try {
           const response = await fetch("http://localhost:3001/product/admin-get-products", {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           });
           const products = await response.json();
+
           if (response.ok) {
             setStore({ adminProducts: products });
           } else {
@@ -496,11 +456,13 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error in fetchAdminProducts:", error);
         }
       },
+
       fetchProductCategories: async () => {
         try {
           const response = await fetch("http://localhost:3001/product_category");
+          const data = await response.json();
+
           if (response.ok) {
-            const data = await response.json();
             setStore({ productCategories: data });
           } else {
             console.error("Error al obtener categorías de productos");
@@ -509,35 +471,24 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error al obtener categorías de productos:", error);
         }
       },
-      logoutAdmin: async () => {
-        try {
-            const response = await fetch("http://localhost:3001/user/logout-admin", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-            });
-    
-            if (response.ok) {
-                // Remueve datos del admin y token del store
-                setStore({ admin: null, token: null });
-                localStorage.removeItem("admin");
-                localStorage.removeItem("token");
-                return true;
-            } else {
-                console.error("Error al cerrar sesión del administrador");
-                return false;
-            }
-        } catch (error) {
-            console.error("Error de red al intentar cerrar sesión:", error);
-            return false;
-        }
-    },
-      
-  
 
-    
+      // ------------------------------------
+      // USER MANAGEMENT - Gestión de Usuarios
+      // ------------------------------------
+      fetchUsersOnSystem: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/user/get_users_on_system");
+          const data = await response.json();
+
+          if (response.ok) {
+            setStore({ queriedUsers: data });
+          } else {
+            console.error("Error al obtener los usuarios:", data);
+          }
+        } catch (err) {
+          console.error("Error en fetchUsersOnSystem:", err);
+        }
+      },
     },
   };
 };
