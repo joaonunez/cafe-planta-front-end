@@ -1,0 +1,41 @@
+/* ProfileCard.css */
+.profile-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-bottom: 16px;
+    transition: transform 0.2s;
+    background-color: #fff;
+  }
+  
+  .profile-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .profile-card-header {
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+  }
+  
+  .profile-card-header h5 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .profile-card-header p {
+    margin: 4px 0;
+    color: #888;
+    font-size: 14px;
+  }
+  
+  .profile-card-body {
+    padding-top: 8px;
+    font-size: 14px;
+  }
+  
+  .profile-card-body p {
+    margin: 8px 0;
+  }
+  

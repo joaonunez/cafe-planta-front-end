@@ -1,3 +1,9 @@
 @import url('components/home/home.css');
 @import url('components/merchandise/product-card.css');
 @import url('components/butonizer/butonizer.css');
+@import url('components/spinner/spinner.css');
+@import url('components/card/user-card.css');
+@import url('components/admin/user-management.css');
+@import url('components/admin/admin-navbar.css');
+@import url('components/card/admin-product-card.css');
+@import url('components/admin/inventoy-management.css');

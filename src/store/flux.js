@@ -1,6 +1,7 @@
 const getState = ({ getActions, getStore, setStore }) => {
   return {
     store: {
+      admin: JSON.parse(localStorage.getItem("admin")) || null,
       customer: JSON.parse(localStorage.getItem("customer")) || null,
       token: localStorage.getItem("token") || null,
       error: null,
@@ -9,6 +10,9 @@ const getState = ({ getActions, getStore, setStore }) => {
       customerFavorites: [],
       cart: [],
       cartId: null, // Aseguramos que cartId esté presente y disponible
+      queriedUsers: [],
+      adminProducts: [],
+      productCategories: [],
     },
     actions: {
       loginCustomer: async (username, password) => {
@@ -302,7 +306,6 @@ const getState = ({ getActions, getStore, setStore }) => {
       createSale: async (totalAmount, comments) => {
         const { token, cartId } = getStore();
 
-        // Verificamos si `cartId` está en el store antes de continuar
         if (!cartId) {
           console.error("Error: No se encontró cartId en el store.");
           return false;
@@ -319,14 +322,16 @@ const getState = ({ getActions, getStore, setStore }) => {
             body: JSON.stringify({
               total_amount: totalAmount,
               comments,
-              cart_id: cartId, // Usamos el `cartId` almacenado en el store
+              cart_id: cartId,
             }),
           });
 
           if (!response.ok) throw new Error("Failed to create sale");
 
           const data = await response.json();
-          setStore({ cart: [] }); // Limpiar carrito después de compra
+          setStore({ cart: [] });
+          await getActions().clearCartItems();
+          await getActions().deleteCart();
           return true;
         } catch (error) {
           console.error("Error creating sale:", error);
@@ -334,6 +339,47 @@ const getState = ({ getActions, getStore, setStore }) => {
         }
       },
 
+
+
+      clearCartItems: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/cart/clear_items", {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Failed to clear cart items");
+
+          return true;
+        } catch (error) {
+          console.error("Error clearing cart items:", error);
+          return false;
+        }
+      },
+
+      deleteCart: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/cart/delete", {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Failed to delete cart");
+
+          return true;
+        } catch (error) {
+          console.error("Error deleting cart:", error);
+          return false;
+        }
+      },
 
       getLatestOrder: async () => {
         const { token } = getStore();
@@ -355,6 +401,143 @@ const getState = ({ getActions, getStore, setStore }) => {
           return null;
         }
       },
+      getOrderDetails: async (saleId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/order_details/${saleId}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+      
+          if (!response.ok) throw new Error("Failed to fetch order details");
+      
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+          return null;
+        }
+      },
+      loginAdmin: async (username, password) => {
+        try {
+          const response = await fetch("http://localhost:3001/user/admin-login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: "include",
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.token) {
+            // Guardar el administrador y token en el store
+            setStore({
+              admin: result.user, 
+              token: result.token,
+              error: null,
+            });
+
+            // Guardar en localStorage
+            localStorage.setItem("admin", JSON.stringify(result.user));
+            localStorage.setItem("token", result.token);
+            return true;
+          } else {
+            setStore({ error: result.error });
+            return false;
+          }
+        } catch (err) {
+          console.error("Error en la solicitud:", err);
+          setStore({ error: "Error de conexión. Intenta nuevamente." });
+          return false;
+        }
+      },
+
+      logoutAdmin: () => {
+        setStore({
+          admin: null,
+          token: null,
+        });
+        localStorage.removeItem("admin");
+        localStorage.removeItem("token");
+      },
+      fetchUsersOnSystem: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/user/get_users_on_system");
+          const data = await response.json();
+          if (response.ok) {
+            setStore({ queriedUsers: data });
+          } else {
+            console.error("Error al obtener los usuarios: ", data);
+          }
+        } catch (err) {
+          console.error("Error en fetchUsersOnSystem:", err);
+        }
+      },
+      fetchAdminProducts: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/product/admin-get-products", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const products = await response.json();
+          if (response.ok) {
+            setStore({ adminProducts: products });
+          } else {
+            console.error("Error fetching products for admin:", products.error);
+          }
+        } catch (error) {
+          console.error("Error in fetchAdminProducts:", error);
+        }
+      },
+      fetchProductCategories: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/product_category");
+          if (response.ok) {
+            const data = await response.json();
+            setStore({ productCategories: data });
+          } else {
+            console.error("Error al obtener categorías de productos");
+          }
+        } catch (error) {
+          console.error("Error al obtener categorías de productos:", error);
+        }
+      },
+      logoutAdmin: async () => {
+        try {
+            const response = await fetch("http://localhost:3001/user/logout-admin", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+            });
+    
+            if (response.ok) {
+                // Remueve datos del admin y token del store
+                setStore({ admin: null, token: null });
+                localStorage.removeItem("admin");
+                localStorage.removeItem("token");
+                return true;
+            } else {
+                console.error("Error al cerrar sesión del administrador");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error de red al intentar cerrar sesión:", error);
+            return false;
+        }
+    },
+      
+  
+
+    
     },
   };
 };

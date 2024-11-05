@@ -1,0 +1,15 @@
+.navbar {
+    padding: 0.8rem 1.2rem;
+  }
+  
+  .navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    transition: background-color 1s ease, color 1s ease;
+  }
+  
+  .active-link {
+    background-color: #343a40 !important;
+    color: #fff !important;
+  }
+  

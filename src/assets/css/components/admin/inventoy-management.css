@@ -1,0 +1,18 @@
+/* src/components/admin/inventory-management.css */
+.inventory-filter-input,
+.inventory-filter-select {
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.page-info {
+  font-weight: bold;
+}
