@@ -341,34 +341,34 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       createSale: async (totalAmount, comments) => {
         const { token, cartId } = getStore();
-
+    
         if (!cartId) {
-          console.error("Error: No se encontró cartId en el store.");
-          return false;
+            console.error("Error: No se encontró cartId en el store.");
+            return false;
         }
-
+    
         try {
-          const response = await fetch("http://localhost:3001/sale/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
-            body: JSON.stringify({ total_amount: totalAmount, comments, cart_id: cartId }),
-          });
-
-          if (!response.ok) throw new Error("Failed to create sale");
-          const data = await response.json();
-          setStore({ cart: [] });
-          await getActions().clearCartItems();
-          await getActions().deleteCart();
-          return true;
+            const response = await fetch("http://localhost:3001/sale/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: "include",
+                body: JSON.stringify({ total_amount: totalAmount, comments, cart_id: cartId }),
+            });
+    
+            if (!response.ok) throw new Error("Failed to create sale");
+            setStore({ cart: [] });
+            await getActions().clearCartItems();
+            await getActions().deleteCart();
+            return true;
         } catch (error) {
-          console.error("Error creating sale:", error);
-          return false;
+            console.error("Error creating sale:", error);
+            return false;
         }
-      },
+    },
+    
 
       getLatestOrder: async () => {
         const { token } = getStore();
