@@ -3,6 +3,7 @@ const getState = ({ getActions, getStore, setStore }) => {
     store: {
       admin: JSON.parse(localStorage.getItem("admin")) || null,
       customer: JSON.parse(localStorage.getItem("customer")) || null,
+      employee: JSON.parse(localStorage.getItem("employee")) || null,
       token: localStorage.getItem("token") || null,
       error: null,
       customerRequestProducts: [],
@@ -13,6 +14,9 @@ const getState = ({ getActions, getStore, setStore }) => {
       queriedUsers: [],
       adminProducts: [],
       productCategories: [],
+      ordersInProgress: [],
+      takenOrders: [],
+      
     },
     actions: {
       // ------------------------------------
@@ -123,6 +127,47 @@ const getState = ({ getActions, getStore, setStore }) => {
           return false;
         }
       },
+      employeeLogin: async (username, password) => {
+        try {
+          const response = await fetch("http://localhost:3001/user/employee-login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: "include",
+          });
+      
+          if (!response.ok) throw new Error("Failed to login");
+      
+          const data = await response.json();
+          setStore({ token: data.token, employee: data.user });
+          localStorage.setItem("token", data.token); // Almacena el token
+          localStorage.setItem("employee", JSON.stringify(data.user)); // Almacena los datos del empleado
+          return true;
+        } catch (error) {
+          console.error("Error during employee login:", error);
+          return false;
+        }
+      },
+      
+    
+    logoutEmployee: async () => {
+      try {
+          const response = await fetch("http://localhost:3001/user/logout-employee", {
+              method: "POST",
+              credentials: "include",
+          });
+  
+          if (!response.ok) throw new Error("Failed to logout");
+  
+          setStore({ token: null, employee: null });
+          return true;
+      } catch (error) {
+          console.error("Error during employee logout:", error);
+          return false;
+      }
+  },
 
       registerCustomer: async (customerData) => {
         try {
@@ -476,10 +521,19 @@ const getState = ({ getActions, getStore, setStore }) => {
       // USER MANAGEMENT - Gestión de Usuarios
       // ------------------------------------
       fetchUsersOnSystem: async () => {
+        const { token } = getStore(); // Asegurarse de obtener el token actual
         try {
-          const response = await fetch("http://localhost:3001/user/get_users_on_system");
+          const response = await fetch("http://localhost:3001/user/get_users_on_system", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, // Incluye el token en los headers
+            },
+            credentials: "include", // Asegurarse de incluir las credenciales
+          });
+      
           const data = await response.json();
-
+      
           if (response.ok) {
             setStore({ queriedUsers: data });
           } else {
@@ -489,6 +543,73 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error en fetchUsersOnSystem:", err);
         }
       },
+      
+      // ------------------------------------
+      // ORDERS MANAGEMENT - Gestión de ORDERS
+      // ------------------------------------
+      fetchOrdersInProgress: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/sale/in_progress", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+          
+          if (!response.ok) throw new Error("Error al obtener pedidos en progreso");
+          
+          const data = await response.json();
+          setStore({ ordersInProgress: data });
+        } catch (error) {
+          console.error("Error al obtener pedidos en progreso:", error);
+        }
+      },
+      // Acción para que el vendedor tome una orden
+      takeOrder: async (orderId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/take_order/${orderId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            alert("La orden ya ha sido tomada.");
+            getActions().fetchOrdersInProgress(); // Actualiza los pedidos en progreso
+            return;
+          }
+
+          alert("Orden tomada exitosamente.");
+          getActions().fetchOrdersInProgress();
+          getActions().fetchTakenOrders(); // Actualiza las órdenes tomadas por el vendedor
+        } catch (error) {
+          console.error("Error al tomar la orden:", error);
+        }
+      },
+
+      // Acción para obtener los pedidos que el vendedor ha tomado
+      fetchTakenOrders: async () => {
+        const { token, employee } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/taken_orders/${employee.rut}`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Error al obtener pedidos tomados");
+
+          const data = await response.json();
+          setStore({ takenOrders: data });
+        } catch (error) {
+          console.error("Error al obtener pedidos tomados:", error);
+        }
+      },
+      
     },
   };
 };
