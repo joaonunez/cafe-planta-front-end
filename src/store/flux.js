@@ -17,6 +17,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       ordersInProgress: [],
       takenOrders: [],
       allSalesRequestByAdmin: [],
+      cafes: [],
       
     },
     actions: {
@@ -654,6 +655,20 @@ const getState = ({ getActions, getStore, setStore }) => {
             console.error("Error en la solicitud para eliminar la venta:", error);
         }
     },
+    fetchCafes: async () => {
+      try {
+        const response = await fetch("http://localhost:3001/cafe/");
+        if (response.ok) {
+          const data = await response.json();
+          setStore({ cafes: data });
+        } else {
+          console.error("Error al obtener las sedes de café:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error en fetchCafes:", error);
+      }
+    },
+
       
     },
   };
