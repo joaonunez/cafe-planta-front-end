@@ -16,6 +16,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       productCategories: [],
       ordersInProgress: [],
       takenOrders: [],
+      allSalesRequestByAdmin: [],
       
     },
     actions: {
@@ -609,6 +610,50 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error al obtener pedidos tomados:", error);
         }
       },
+      fetchAllSalesRequestByAdmin: async () => {
+        try {
+            const response = await fetch(`http://localhost:3001/sale/request_all_sales_by_admin`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${getStore().token}`
+                },
+                credentials: "include" // Incluye las credenciales en la solicitud
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setStore({ allSalesRequestByAdmin: data });
+            } else {
+                console.error("Error al obtener todas las ventas:", response.status);
+            }
+        } catch (error) {
+            console.error("Error en la solicitud de todas las ventas:", error);
+        }
+    },
+    
+    // Función para eliminar una venta específica por ID
+    deleteSaleByAdmin: async (saleId) => {
+        try {
+            const response = await fetch(`http://localhost:3001/sale/delete_sale_by_admin/${saleId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${getStore().token}`
+                },
+                credentials: "include" // Incluye las credenciales en la solicitud
+            });
+            if (response.ok) {
+                const { allSalesRequestByAdmin } = getStore();
+                // Actualizar el estado eliminando la venta eliminada
+                setStore({
+                    allSalesRequestByAdmin: allSalesRequestByAdmin.filter((sale) => sale.id !== saleId)
+                });
+                console.log("Venta eliminada exitosamente.");
+            } else {
+                console.error("Error al eliminar la venta:", response.status);
+            }
+        } catch (error) {
+            console.error("Error en la solicitud para eliminar la venta:", error);
+        }
+    },
       
     },
   };
