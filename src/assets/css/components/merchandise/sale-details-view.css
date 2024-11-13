@@ -1,0 +1,26 @@
+.sale-details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sale-item-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.sale-item-card h5 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.sale-item-card p {
+    font-size: 16px;
+    margin: 5px 0;
+}

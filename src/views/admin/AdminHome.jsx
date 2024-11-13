@@ -12,6 +12,8 @@ import { FaUserCog, FaClipboardList, FaChartLine } from "react-icons/fa";
 import UserManagement from "../../components/admin/UserManagement";
 import InventoryManagement from "../../components/admin/InventoryManagement";
 import ViewAllSales from "../../components/admin/ViewAllSales";
+import SaleDetailsView from "../../components/admin/SaleDetailsView";
+
 
 const AdminHome = () => {
   const { store, actions } = useContext(Context);
@@ -163,6 +165,7 @@ const AdminHome = () => {
             element={<InventoryManagement />}
           />
           <Route path="/view-admin-all-sales" element={<ViewAllSales />} />
+          <Route path="/view-admin-all-sales/view-details/:saleId" element={<SaleDetailsView />} />
         </Routes>
       </div>
     </>

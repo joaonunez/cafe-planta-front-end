@@ -668,6 +668,25 @@ const getState = ({ getActions, getStore, setStore }) => {
         console.error("Error en fetchCafes:", error);
       }
     },
+    fetchSaleDetails: async (saleId) => {
+      try {
+          const response = await fetch(`http://localhost:3001/sale_detail/${saleId}`);
+          if (response.ok) {
+              const details = await response.json();
+              return details.map(item => ({
+                  ...item,
+                  name: item.item_type_id === 1 ? item.product.name : item.combo.name,
+                  image_url: item.item_type_id === 1 ? item.product.image_url : item.combo.image_url,
+              }));
+          } else {
+              console.error("Error fetching sale details");
+              return [];
+          }
+      } catch (error) {
+          console.error("Error in fetchSaleDetails:", error);
+          return [];
+      }
+  }
 
       
     },
