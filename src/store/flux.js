@@ -686,7 +686,56 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error in fetchSaleDetails:", error);
           return [];
       }
-  }
+  },
+  fetchSaleEditDetails: async (saleId) => {
+    const { token } = getStore();
+    try {
+      const response = await fetch(`http://localhost:3001/sale/${saleId}/edit-details`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        credentials: "include"
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setStore({ saleEditData: data });
+      } else {
+        console.error("Error al obtener datos para la edición de la venta");
+      }
+    } catch (error) {
+      console.error("Error en fetchSaleEditDetails:", error);
+    }
+  },
+  
+updateSaleDetails: async (saleId, updatedData) => {
+    const { token } = getStore();
+    try {
+      const response = await fetch(`http://localhost:3001/sale/${saleId}/edit-details`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        credentials: "include",
+        body: JSON.stringify(updatedData)
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        const updatedSales = getStore().allSalesRequestByAdmin.map(sale =>
+          sale.id === saleId ? data : sale
+        );
+        setStore({ allSalesRequestByAdmin: updatedSales });
+      } else {
+        console.error("Error al actualizar la venta");
+      }
+    } catch (error) {
+      console.error("Error en updateSaleDetails:", error);
+    }
+  },
+  
 
       
     },

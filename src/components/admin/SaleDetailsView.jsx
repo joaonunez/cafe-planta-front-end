@@ -17,7 +17,7 @@ const SaleDetailsView = () => {
       setIsLoading(false);
     };
     fetchSaleDetails();
-  }, [saleId, actions]);
+  }, [saleId]);
 
   if (isLoading) {
     return <p>Loading...</p>;

@@ -8,8 +8,11 @@ const ViewAllSales = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        actions.fetchAllSalesRequestByAdmin();
-    }, [actions]);
+        // Solo se llama una vez para obtener todas las ventas
+        if (!store.allSalesRequestByAdmin.length) {
+            actions.fetchAllSalesRequestByAdmin();
+        }
+    }, [store.allSalesRequestByAdmin.length, actions]);
 
     const handleDeleteSale = (saleId) => {
         actions.deleteSaleByAdmin(saleId);
@@ -17,6 +20,10 @@ const ViewAllSales = () => {
 
     const handleViewDetails = (saleId) => {
         navigate(`/admin/view-admin-all-sales/view-details/${saleId}`);
+    };
+
+    const handleSaveChanges = (updatedSale) => {
+        actions.updateSaleDetails(updatedSale.id, updatedSale);
     };
 
     return (
@@ -29,6 +36,7 @@ const ViewAllSales = () => {
                         sale={sale}
                         onDelete={handleDeleteSale}
                         onViewDetails={() => handleViewDetails(sale.id)}
+                        onSaveChanges={handleSaveChanges}
                     />
                 ))}
             </div>
