@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../../store/context';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2'; // Importar SweetAlert2
 
 const CustomerRegister = () => {
     const { actions } = useContext(Context);
@@ -13,56 +13,11 @@ const CustomerRegister = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
-    const validateRut = (rut) => {
-        const rutRegex = /^[0-9]+-[0-9Kk]$/;
-        return rutRegex.test(rut);
-    };
-
-    const validateName = (name) => {
-        const nameRegex = /^[a-zA-Z\s]{3,50}$/;
-        return nameRegex.test(name);
-    };
-
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
-    const validateUsername = (username) => {
-        const usernameRegex = /^[a-zA-Z0-9._-]{5,20}$/;
-        return usernameRegex.test(username);
-    };
-
-    const validatePassword = (password) => {
-        const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-        return passwordRegex.test(password);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage('');
+        setErrorMessage(''); // Limpiar mensaje de error al enviar el formulario
 
-        if (!validateRut(rut)) {
-            setErrorMessage('RUT inválido. Debe seguir el formato 12345678-K.');
-            return;
-        }
-        if (!validateName(name)) {
-            setErrorMessage('El nombre debe tener entre 3 y 50 letras y solo puede contener espacios y letras.');
-            return;
-        }
-        if (!validateEmail(email)) {
-            setErrorMessage('Correo electrónico inválido.');
-            return;
-        }
-        if (!validateUsername(username)) {
-            setErrorMessage('El nombre de usuario debe tener entre 5 y 20 caracteres y solo puede contener letras, números, puntos, guiones y guiones bajos.');
-            return;
-        }
-        if (!validatePassword(password)) {
-            setErrorMessage('La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.');
-            return;
-        }
-
+        // Llamar a registerCustomer con los datos correctos
         const { success, message } = await actions.registerCustomer({
             rut,
             name,
@@ -72,6 +27,7 @@ const CustomerRegister = () => {
         });
 
         if (success) {
+            // Mostrar SweetAlert de loading
             Swal.fire({
                 title: 'Registrando...',
                 text: 'Por favor, espere...',
@@ -81,29 +37,30 @@ const CustomerRegister = () => {
                 },
             });
 
+            // Simular un delay de 3 segundos
             setTimeout(() => {
-                Swal.close();
+                Swal.close(); // Cerrar el loading
                 Swal.fire({
                     icon: 'success',
                     title: 'Registro exitoso',
                     text: 'El usuario ha sido creado correctamente.',
                 }).then(() => {
-                    navigate("/login");
+                    navigate("/login"); // Redirigir al login
                 });
             }, 3000);
         } else {
-            setErrorMessage(message || 'Error en el registro');
+            setErrorMessage(message || 'Error en el registro'); // Mostrar mensaje de error si hay uno
         }
     };
 
     const handleBack = () => {
-        navigate(-1);
+        navigate(-1); // Navegar hacia atrás
     };
 
     return (
         <div className="container mt-5">
             <h2>Registro de Cliente</h2>
-            {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+            {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} {/* Mensaje de error */}
             <form onSubmit={handleSubmit} className="border p-4 shadow-sm bg-light">
                 <div className="mb-3">
                     <label htmlFor="rut" className="form-label">RUT</label>
@@ -137,7 +94,7 @@ const CustomerRegister = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <span className="text-muted" style={{ fontSize: '0.9em' }}> (Para contactarte)</span>
+                    <span className="text-muted" style={{ fontSize: '0.9em' }}> (Para contactarte)</span> {/* Descripción del email */}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="username" className="form-label">Nombre de Usuario</label>
@@ -149,7 +106,7 @@ const CustomerRegister = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                    <span className="text-muted" style={{ fontSize: '0.9em' }}> (Con el que iniciarás sesión)</span>
+                    <span className="text-muted" style={{ fontSize: '0.9em' }}> (Con el que iniciarás sesión)</span> {/* Descripción del nombre de usuario */}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="password" className="form-label">Contraseña</label>
