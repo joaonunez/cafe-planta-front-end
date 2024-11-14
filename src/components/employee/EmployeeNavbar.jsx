@@ -1,3 +1,4 @@
+// components/employee/EmployeeNavbar.js
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Context } from '../../store/context';
@@ -38,6 +39,9 @@ const EmployeeNavbar = () => {
             </li>
             <li className="nav-item">
               <Link to="/employee/taken-orders" className="nav-link">Mis Pedidos</Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/employee/completed-orders" className="nav-link">Ventas Realizadas</Link>
             </li>
             <li className="nav-item">
               <button onClick={handleLogout} className="btn nav-link text-white d-flex align-items-center">

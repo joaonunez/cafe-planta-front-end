@@ -552,20 +552,20 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchOrdersInProgress: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/sale/in_progress", {
-            method: "GET",
-            headers: { Authorization: `Bearer ${token}` },
-            credentials: "include",
-          });
-          
-          if (!response.ok) throw new Error("Error al obtener pedidos en progreso");
-          
-          const data = await response.json();
-          setStore({ ordersInProgress: data });
+            const response = await fetch("http://localhost:3001/sale/in_progress", {
+                method: "GET",
+                headers: { Authorization: `Bearer ${token}` },
+                credentials: "include",
+            });
+            
+            if (!response.ok) throw new Error("Error al obtener pedidos en progreso");
+            
+            const data = await response.json();
+            setStore({ ordersInProgress: data });
         } catch (error) {
-          console.error("Error al obtener pedidos en progreso:", error);
+            console.error("Error al obtener pedidos en progreso:", error);
         }
-      },
+    },
       // Acción para que el vendedor tome una orden
       takeOrder: async (orderId) => {
         const { token } = getStore();
@@ -597,20 +597,20 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchTakenOrders: async () => {
         const { token, employee } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/taken_orders/${employee.rut}`, {
-            method: "GET",
-            headers: { Authorization: `Bearer ${token}` },
-            credentials: "include",
-          });
-
-          if (!response.ok) throw new Error("Error al obtener pedidos tomados");
-
-          const data = await response.json();
-          setStore({ takenOrders: data });
+            const response = await fetch(`http://localhost:3001/sale/taken_orders/${employee.rut}`, {
+                method: "GET",
+                headers: { Authorization: `Bearer ${token}` },
+                credentials: "include",
+            });
+    
+            if (!response.ok) throw new Error("Error al obtener pedidos tomados");
+    
+            const data = await response.json();
+            setStore({ takenOrders: data });
         } catch (error) {
-          console.error("Error al obtener pedidos tomados:", error);
+            console.error("Error al obtener pedidos tomados:", error);
         }
-      },
+    },
       fetchAllSalesRequestByAdmin: async () => {
         try {
             const response = await fetch(`http://localhost:3001/sale/request_all_sales_by_admin`, {
@@ -709,6 +709,7 @@ const getState = ({ getActions, getStore, setStore }) => {
     }
   },
   
+  
 updateSaleDetails: async (saleId, updatedData) => {
     const { token } = getStore();
     try {
@@ -733,6 +734,45 @@ updateSaleDetails: async (saleId, updatedData) => {
       }
     } catch (error) {
       console.error("Error en updateSaleDetails:", error);
+    }
+  },
+  markOrderAsDelivered: async (orderId) => {
+    const { token } = getStore();
+    try {
+      const response = await fetch(`http://localhost:3001/sale/mark_as_delivered/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        credentials: "include"
+      });
+  
+      if (!response.ok) throw new Error("Error al marcar la orden como entregada");
+  
+      getActions().fetchTakenOrders(); // Actualiza los pedidos tomados
+      getActions().fetchCompletedOrders(); // Actualiza las ventas realizadas
+    } catch (error) {
+      console.error("Error al marcar la orden como entregada:", error);
+    }
+  },
+  
+  // Acción para obtener ventas realizadas (entregadas)
+  fetchCompletedOrders: async () => {
+    const { token, employee } = getStore();
+    try {
+      const response = await fetch(`http://localhost:3001/sale/completed_orders/${employee.rut}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include"
+      });
+  
+      if (!response.ok) throw new Error("Error al obtener ventas realizadas");
+  
+      const data = await response.json();
+      setStore({ completedOrders: data });
+    } catch (error) {
+      console.error("Error al obtener ventas realizadas:", error);
     }
   },
   

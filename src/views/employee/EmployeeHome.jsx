@@ -1,10 +1,12 @@
+// EmployeeHome.js
 import React, { useContext, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Context } from '../../store/context';
 import EmployeeNavbar from '../../components/employee/EmployeeNavbar';
 import EmployeeOrders from '../../components/employee/EmployeeOrders';
-import EmployeeTakenOrders from '../../components/employee/EmployeeTakenOrders ';
 
+import EmployeeCompletedOrders from '../../components/employee/EmployeeCompletedOrders';
+import EmployeeTakenOrders from '../../components/employee/EmployeeTakenOrders ';
 
 const EmployeeHome = () => {
   const { store } = useContext(Context);
@@ -28,6 +30,7 @@ const EmployeeHome = () => {
       <Routes>
         <Route path="/orders" element={<EmployeeOrders />} />
         <Route path="/taken-orders" element={<EmployeeTakenOrders />} />
+        <Route path="/completed-orders" element={<EmployeeCompletedOrders />} />
       </Routes>
     </>
   );

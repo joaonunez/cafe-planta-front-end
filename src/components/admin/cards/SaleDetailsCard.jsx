@@ -13,12 +13,18 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
   }, [isEditing, sale.id, store.saleEditData, actions]);
 
   const handleEditClick = () => setIsEditing(true);
+  
   const handleCancelClick = () => {
     setEditedSale({ ...sale });
     setIsEditing(false);
   };
+
   const handleSaveClick = () => {
-    onSaveChanges(editedSale);
+    const updatedData = {
+      ...editedSale,
+      status: editedSale.waiter_rut ? "Orden Tomada" : "En preparación" // Cambia el estado si se asigna un mesero
+    };
+    onSaveChanges(updatedData);
     setIsEditing(false);
   };
 
@@ -49,6 +55,7 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
                 onChange={handleChange}
                 className="form-control"
               />
+
               <label><strong>Comentarios:</strong></label>
               <input
                 type="text"
@@ -57,6 +64,7 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
                 onChange={handleChange}
                 className="form-control"
               />
+
               <label><strong>Cafetería:</strong></label>
               <select
                 name="cafe_id"
@@ -79,7 +87,9 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
               >
                 <option value="">Seleccione un Mesero</option>
                 {store.saleEditData?.waiters && store.saleEditData.waiters.map((waiter) => (
-                  <option key={waiter.rut} value={waiter.rut}>{waiter.first_name} {waiter.last_name_father}</option>
+                  <option key={waiter.rut} value={waiter.rut}>
+                    {waiter.first_name} {waiter.last_name_father}
+                  </option>
                 ))}
               </select>
 
