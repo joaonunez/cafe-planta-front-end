@@ -7,6 +7,9 @@ const ComboCard = () => {
   const [favoriteCombos, setFavoriteCombos] = useState([]);
   const [loading, setLoading] = useState(true); // Estado para el spinner general de carga
   const [imageLoading, setImageLoading] = useState({}); // Estado para el spinner por imagen
+  const [searchTerm, setSearchTerm] = useState(""); // Estado para el filtro por nombre
+  const [currentPage, setCurrentPage] = useState(1); // Estado para la página actual
+  const combosPerPage = 4; // Número de combos por página
 
   useEffect(() => {
     const loadCombosAndFavorites = async () => {
@@ -78,10 +81,43 @@ const ComboCard = () => {
     );
   }
 
+  // Filtrar combos por palabras clave
+  const filteredCombos = store.customerRequestCombos.filter((combo) => {
+    const keywords = searchTerm.toLowerCase().split(" "); // Dividir en palabras clave
+    return keywords.every((keyword) =>
+      combo.name.toLowerCase().includes(keyword)
+    ); // Verificar si cada palabra clave está en el nombre del combo
+  });
+
+  // Determinar combos para la página actual
+  const indexOfLastCombo = currentPage * combosPerPage;
+  const indexOfFirstCombo = indexOfLastCombo - combosPerPage;
+  const currentCombos = filteredCombos.slice(indexOfFirstCombo, indexOfLastCombo);
+
+  // Calcular el número total de páginas
+  const totalPages = Math.ceil(filteredCombos.length / combosPerPage);
+
+  const changePage = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
   return (
     <div className="container">
+      <div className="row mb-4">
+        <div className="col">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Buscar combos por palabras clave..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
       <div className="row">
-        {store.customerRequestCombos.map((combo, index) => (
+        {currentCombos.map((combo, index) => (
           <div key={index} className="col-md-4 mb-4">
             <div className="card">
               <div className="image-container" style={{ position: "relative" }}>
@@ -114,6 +150,26 @@ const ComboCard = () => {
             </div>
           </div>
         ))}
+      </div>
+      {/* Paginación */}
+      <div className="d-flex justify-content-center mt-4">
+        <button
+          className="btn btn-secondary mx-1"
+          onClick={() => changePage(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Anterior
+        </button>
+        <span className="mx-2">
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          className="btn btn-secondary mx-1"
+          onClick={() => changePage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Siguiente
+        </button>
       </div>
     </div>
   );
