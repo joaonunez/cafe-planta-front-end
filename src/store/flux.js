@@ -633,30 +633,29 @@ const getState = ({ getActions, getStore, setStore }) => {
         }
     },
     
-    // Función para eliminar una venta específica por ID
     deleteSaleByAdmin: async (saleId) => {
-        try {
-            const response = await fetch(`http://localhost:3001/sale/delete_sale_by_admin/${saleId}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${getStore().token}`
-                },
-                credentials: "include" // Incluye las credenciales en la solicitud
-            });
-            if (response.ok) {
-                const { allSalesRequestByAdmin } = getStore();
-                // Actualizar el estado eliminando la venta eliminada
-                setStore({
-                    allSalesRequestByAdmin: allSalesRequestByAdmin.filter((sale) => sale.id !== saleId)
-                });
-                console.log("Venta eliminada exitosamente.");
-            } else {
-                console.error("Error al eliminar la venta:", response.status);
-            }
-        } catch (error) {
-            console.error("Error en la solicitud para eliminar la venta:", error);
-        }
-    },
+      try {
+          const response = await fetch(`http://localhost:3001/sale/delete_sale_by_admin/${saleId}`, {
+              method: "DELETE",
+              headers: {
+                  Authorization: `Bearer ${getStore().token}`,
+              },
+              credentials: "include",
+          });
+  
+          if (response.ok) {
+              console.log(`Venta con ID ${saleId} eliminada exitosamente.`);
+              const updatedSales = getStore().allSalesRequestByAdmin.filter((sale) => sale.id !== saleId);
+              setStore({ allSalesRequestByAdmin: updatedSales });
+          } else {
+              const error = await response.json();
+              console.error("Error al eliminar la venta:", error);
+          }
+      } catch (error) {
+          console.error("Error en la solicitud para eliminar la venta:", error);
+      }
+  },
+  
     fetchCafes: async () => {
       try {
         const response = await fetch("http://localhost:3001/cafe/");
@@ -841,6 +840,38 @@ updateSaleDetails: async (saleId, updatedData) => {
             return false;
         }
     },
+    deleteProduct: async (productId, adminPassword) => {
+      const { admin, token } = getStore();
+    
+      try {
+        const response = await fetch(`http://localhost:3001/product/delete/${productId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include", // Aseguramos incluir las credenciales
+          body: JSON.stringify({
+            admin_rut: admin.rut,
+            password: adminPassword,
+          }),
+        });
+    
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error al eliminar el producto:", errorData);
+          return false;
+        }
+    
+        // Actualizar la lista de productos después de eliminar
+        await getActions().fetchAdminProducts();
+        return true;
+      } catch (error) {
+        console.error("Error en deleteProduct:", error);
+        return false;
+      }
+    },
+    
     
   
 

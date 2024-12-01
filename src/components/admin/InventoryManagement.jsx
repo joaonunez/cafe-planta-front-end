@@ -12,23 +12,24 @@ const InventoryManagement = () => {
   const [isLoading, setIsLoading] = useState(true); // Estado de carga
   const productsPerPage = 5;
 
+  // Cargar datos iniciales sin acciones directas en useEffect
+  const fetchInitialData = async () => {
+    await Promise.all([actions.fetchAdminProducts(), actions.fetchProductCategories()]);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      await actions.fetchAdminProducts();
-      await actions.fetchProductCategories();
-      setIsLoading(false); // Cambia a falso después de cargar los datos
-    };
-    fetchData();
+    fetchInitialData();
   }, []);
 
   const handleNameFilterChange = (e) => {
     setNameFilter(e.target.value);
-    setCurrentPage(1); // Reinicia a la primera página al cambiar el filtro
+    setCurrentPage(1);
   };
 
   const handleCategoryFilterChange = (e) => {
     setCategoryFilter(e.target.value);
-    setCurrentPage(1); // Reinicia a la primera página al cambiar el filtro
+    setCurrentPage(1);
   };
 
   const filteredProducts = store.adminProducts.filter((product) => {
@@ -62,7 +63,7 @@ const InventoryManagement = () => {
       <div className="mb-3">
         <button
           className="btn btn-primary"
-          onClick={() => navigate('/admin/add-product')} // Redirige al formulario
+          onClick={() => navigate('/admin/add-product')}
         >
           Añadir Producto
         </button>
@@ -83,6 +84,7 @@ const InventoryManagement = () => {
                 className="form-control inventory-filter-input"
                 value={nameFilter}
                 onChange={handleNameFilterChange}
+                autoComplete="off" // Deshabilitar sugerencias
               />
             </div>
             <div className="col-md-6">
@@ -90,6 +92,7 @@ const InventoryManagement = () => {
                 className="form-control inventory-filter-select"
                 value={categoryFilter}
                 onChange={handleCategoryFilterChange}
+                autoComplete="off" // Deshabilitar sugerencias
               >
                 <option value="">Todas las Categorías</option>
                 {store.productCategories.map((category) => (
@@ -104,9 +107,13 @@ const InventoryManagement = () => {
           <div className="row">
             {currentProducts && currentProducts.length > 0 ? (
               currentProducts.map((product) => (
-                <div key={product.id} className="col-md-4 mb-3">
-                  <ProductCard product={product} />
-                </div>
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onDelete={async (productId, password) =>
+                    await actions.deleteProduct(productId, password)
+                  }
+                />
               ))
             ) : (
               <p>No hay productos en inventario.</p>

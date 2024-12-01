@@ -15,8 +15,11 @@ const ViewAllSales = () => {
     }, [store.allSalesRequestByAdmin.length, actions]);
 
     const handleDeleteSale = (saleId) => {
-        actions.deleteSaleByAdmin(saleId);
+        if (window.confirm(`¿Estás seguro de que deseas eliminar la venta con ID ${saleId}?`)) {
+            actions.deleteSaleByAdmin(saleId);
+        }
     };
+    
 
     const handleViewDetails = (saleId) => {
         navigate(`/admin/view-admin-all-sales/view-details/${saleId}`);
