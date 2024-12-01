@@ -13,6 +13,8 @@ import UserManagement from "../../components/admin/UserManagement";
 import InventoryManagement from "../../components/admin/InventoryManagement";
 import ViewAllSales from "../../components/admin/ViewAllSales";
 import SaleDetailsView from "../../components/admin/SaleDetailsView";
+import AddProduct from "../../components/admin/AddProduct";
+import EditProduct from "../../components/admin/EditProduct";
 
 
 const AdminHome = () => {
@@ -166,6 +168,8 @@ const AdminHome = () => {
           />
           <Route path="/view-admin-all-sales" element={<ViewAllSales />} />
           <Route path="/view-admin-all-sales/view-details/:saleId" element={<SaleDetailsView />} />
+          <Route path="/add-product" element={<AddProduct />} />
+          <Route path="/edit-product/:id" element={<EditProduct />} />
         </Routes>
       </div>
     </>

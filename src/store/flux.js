@@ -199,7 +199,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       addToCart: async (item_id, item_type_id, quantity = 1) => {
         const { token } = getStore();
-
+      
         try {
           const response = await fetch("http://localhost:3001/cart/add_item", {
             method: "POST",
@@ -210,14 +210,16 @@ const getState = ({ getActions, getStore, setStore }) => {
             credentials: "include",
             body: JSON.stringify({ item_id, item_type_id, quantity }),
           });
-
+      
           if (!response.ok) throw new Error("Failed to add item to cart");
-          const data = await response.json();
-          setStore({ cart: data.cart });
+      
+          // Volver a cargar los ítems del carrito después de agregar
+          await getActions().getCartItems();
         } catch (error) {
           console.error("Error adding item to cart:", error);
         }
       },
+      
 
       getCartItems: async () => {
         const { token } = getStore();
@@ -775,6 +777,71 @@ updateSaleDetails: async (saleId, updatedData) => {
       console.error("Error al obtener ventas realizadas:", error);
     }
   },
+   // ------------------------------------
+      // ADD PRODUCT - Crear Producto
+      // ------------------------------------
+      addProduct: async (formData) => {
+        try {
+          // Hacer la solicitud POST al backend
+          const response = await fetch("http://localhost:3001/product/create", {
+            method: "POST",
+            body: formData, // Enviar el FormData directamente
+          });
+
+          // Verificar si la solicitud fue exitosa
+          if (response.ok) {
+            const result = await response.json();
+            console.log("Producto creado:", result);
+
+            // Opcional: actualizar los productos en el store
+            const actions = getActions();
+            await actions.fetchAdminProducts(); // Recargar los productos para que el nuevo producto aparezca
+            return { success: true, message: "Producto creado exitosamente" };
+          } else {
+            const errorData = await response.json();
+            console.error("Error al crear el producto:", errorData);
+            return { success: false, message: errorData.error || "Error desconocido" };
+          }
+        } catch (error) {
+          console.error("Error en addProduct:", error);
+          return { success: false, message: "Error de conexión al servidor" };
+        }
+      },
+      updateProduct: async (productId, updatedData) => {
+        const { token } = getStore();
+    
+        try {
+            const response = await fetch(`http://localhost:3001/product/update/${productId}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`, // Token incluido para autenticación
+                },
+                body: updatedData, // Enviar el FormData directamente
+                credentials: "include", // Incluir credenciales
+            });
+    
+            if (!response.ok) {
+                const error = await response.json();
+                console.error("Error al actualizar producto:", error);
+                return false;
+            }
+    
+            const data = await response.json();
+    
+            // Actualizar el estado del store para reflejar los cambios
+            const updatedProducts = getStore().adminProducts.map((product) =>
+                product.id === productId ? data.product : product
+            );
+    
+            setStore({ adminProducts: updatedProducts });
+            console.log("Producto actualizado exitosamente:", data);
+            return true;
+        } catch (error) {
+            console.error("Error en updateProduct:", error);
+            return false;
+        }
+    },
+    
   
 
       
