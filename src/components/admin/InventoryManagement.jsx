@@ -1,35 +1,39 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { Context } from '../../store/context';
-import { useNavigate } from 'react-router-dom';
-import ProductCard from './cards/ProductCard';
+import React, { useEffect, useContext, useState } from "react";
+import { Context } from "../../store/context";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import ProductCard from "./cards/ProductCard";
 
 const InventoryManagement = () => {
   const { store, actions } = useContext(Context);
-  const navigate = useNavigate(); // Para redirigir al formulario
-  const [nameFilter, setNameFilter] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true); // Estado de carga
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [nameFilter, setNameFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const currentPage = parseInt(searchParams.get("page") || "1");
   const productsPerPage = 5;
 
-  // Cargar datos iniciales sin acciones directas en useEffect
-  const fetchInitialData = async () => {
-    await Promise.all([actions.fetchAdminProducts(), actions.fetchProductCategories()]);
+  useEffect(() => {
+    actions.fetchAdminProducts();
+    actions.fetchProductCategories();
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
-    fetchInitialData();
-  }, []);
+    // Guardar la ruta actual en el store global
+    const currentPageUrl = `/admin/inventory-management?page=${currentPage}`;
+    actions.setLastInventoryPage(currentPageUrl);
+  }, [currentPage]);
 
   const handleNameFilterChange = (e) => {
     setNameFilter(e.target.value);
-    setCurrentPage(1);
+    setSearchParams({ page: 1 });
   };
 
   const handleCategoryFilterChange = (e) => {
     setCategoryFilter(e.target.value);
-    setCurrentPage(1);
+    setSearchParams({ page: 1 });
   };
 
   const filteredProducts = store.adminProducts.filter((product) => {
@@ -48,28 +52,30 @@ const InventoryManagement = () => {
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    if (currentPage < totalPages) {
+      setSearchParams({ page: currentPage + 1 });
+    }
   };
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
+    if (currentPage > 1) {
+      setSearchParams({ page: currentPage - 1 });
+    }
+  };
+
+  const handleEditProduct = (productId) => {
+    navigate(`/admin/edit-product/${productId}`);
   };
 
   return (
     <div className="container mt-4">
       <h3>Gestión de Inventario</h3>
-
-      {/* Botón para añadir producto */}
       <div className="mb-3">
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/admin/add-product')}
-        >
+        <button className="btn btn-primary" onClick={() => navigate("/admin/add-product")}>
           Añadir Producto
         </button>
       </div>
 
-      {/* Spinner de carga */}
       {isLoading ? (
         <div className="spinner-container">
           <div className="spinner"></div>
@@ -81,18 +87,16 @@ const InventoryManagement = () => {
               <input
                 type="text"
                 placeholder="Filtrar por nombre"
-                className="form-control inventory-filter-input"
+                className="form-control"
                 value={nameFilter}
                 onChange={handleNameFilterChange}
-                autoComplete="off" // Deshabilitar sugerencias
               />
             </div>
             <div className="col-md-6">
               <select
-                className="form-control inventory-filter-select"
+                className="form-control"
                 value={categoryFilter}
                 onChange={handleCategoryFilterChange}
-                autoComplete="off" // Deshabilitar sugerencias
               >
                 <option value="">Todas las Categorías</option>
                 {store.productCategories.map((category) => (
@@ -105,14 +109,12 @@ const InventoryManagement = () => {
           </div>
 
           <div className="row">
-            {currentProducts && currentProducts.length > 0 ? (
+            {currentProducts.length > 0 ? (
               currentProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onDelete={async (productId, password) =>
-                    await actions.deleteProduct(productId, password)
-                  }
+                  onEdit={handleEditProduct}
                 />
               ))
             ) : (

@@ -12,16 +12,16 @@ const AddProduct = () => {
     stock: "",
     product_category_id: "",
     cafe_id: "",
-    image: null, // Aquí manejamos la imagen
+    image: null,
   });
 
   const [errors, setErrors] = useState({});
-  const [previewImage, setPreviewImage] = useState(null); // Para la vista previa de la imagen
+  const [previewImage, setPreviewImage] = useState(null);
 
-  // Cargar datos iniciales como categorías y cafés
   useEffect(() => {
     actions.fetchProductCategories();
     actions.fetchCafes();
+    actions.fetchCloudinaryStats(); // Cargar estadísticas de Cloudinary
   }, []);
 
   const validate = () => {
@@ -36,29 +36,60 @@ const AddProduct = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const validateFile = (file) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"]; // Tipos de imagen permitidos
+    const maxSize = 10 * 1024 * 1024; // 10 MB en bytes
+
+    if (!allowedTypes.includes(file.type)) {
+      return "El archivo debe ser una imagen (JPEG, PNG, GIF).";
+    }
+
+    if (file.size > maxSize) {
+      return "El archivo debe tener un tamaño menor a 10 MB.";
+    }
+
+    return null;
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setFormData({ ...formData, image: file });
 
-    // Mostrar la vista previa de la imagen seleccionada
     if (file) {
+      const error = validateFile(file);
+
+      if (error) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          image: error,
+        }));
+        setFormData({ ...formData, image: null });
+        setPreviewImage(null);
+        return;
+      }
+
+      // Si pasa las validaciones, limpiar errores y actualizar el estado
+      setErrors((prevErrors) => {
+        const { image, ...rest } = prevErrors;
+        return rest;
+      });
+
+      setFormData({ ...formData, image: file });
+
+      // Mostrar la vista previa de la imagen seleccionada
       const previewURL = URL.createObjectURL(file);
       setPreviewImage(previewURL);
-    } else {
-      setPreviewImage(null); // Si no hay archivo, eliminar vista previa
     }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    // Crear FormData para enviar los datos
     const form = new FormData();
     form.append("name", formData.name);
     form.append("price", formData.price);
@@ -67,7 +98,7 @@ const AddProduct = () => {
     form.append("cafe_id", formData.cafe_id);
     form.append("image", formData.image);
 
-    const success = await actions.addProduct(form); // Acceder a la lógica del backend
+    const success = await actions.addProduct(form);
     if (success) {
       navigate("/admin/inventory-management");
     } else {
@@ -75,11 +106,16 @@ const AddProduct = () => {
     }
   };
 
+  const cloudinaryStats = store.cloudinaryStats || {
+    used_space: 0,
+    total_space: 1,
+    percentage_used: 0,
+  };
+
   return (
     <div className="container mt-4">
       <h3>Añadir Producto</h3>
       <form onSubmit={handleSubmit} className="row g-3">
-        {/* Vista previa de la imagen */}
         {previewImage && (
           <div className="col-md-12 text-center mb-3">
             <img
@@ -182,9 +218,35 @@ const AddProduct = () => {
             className={`form-control ${errors.image ? "is-invalid" : ""}`}
             id="image"
             name="image"
+            accept="image/*"
             onChange={handleFileChange}
           />
           {errors.image && <div className="invalid-feedback">{errors.image}</div>}
+
+          {/* Barra de progreso */}
+          <div className="mt-3">
+            <div className="progress" style={{ height: "20px" }}>
+              <div
+                className="progress-bar"
+                role="progressbar"
+                style={{
+                  width: `${cloudinaryStats.percentage_used}%`,
+                  backgroundColor:
+                    cloudinaryStats.percentage_used < 50
+                      ? "green"
+                      : cloudinaryStats.percentage_used < 80
+                      ? "yellow"
+                      : "red",
+                }}
+              >
+                {cloudinaryStats.percentage_used.toFixed(1)}% usado
+              </div>
+            </div>
+            <p className="text-muted mt-2">
+              Espacio usado: {cloudinaryStats.used_space.toFixed(2)} GB /{" "}
+              {cloudinaryStats.total_space.toFixed(2)} GB
+            </p>
+          </div>
         </div>
 
         {/* Botón Guardar */}

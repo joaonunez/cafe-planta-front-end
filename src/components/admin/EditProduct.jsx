@@ -72,7 +72,7 @@ const EditProduct = () => {
 
     const success = await actions.updateProduct(id, form);
     if (success) {
-      navigate("/admin/inventory-management");
+      navigate(store.lastInventoryPage); // Volver a la última página visitada
     } else {
       alert("Hubo un error al actualizar el producto.");
     }
@@ -202,7 +202,7 @@ const EditProduct = () => {
           <button
             type="button"
             className="btn btn-secondary ms-2"
-            onClick={() => navigate("/admin/inventory-management")}
+            onClick={() => navigate(store.lastInventoryPage)}
           >
             Cancelar
           </button>

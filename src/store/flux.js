@@ -18,9 +18,19 @@ const getState = ({ getActions, getStore, setStore }) => {
       takenOrders: [],
       allSalesRequestByAdmin: [],
       cafes: [],
+      lastInventoryPage: "/admin/inventory-management?page=1",
       
     },
     actions: {
+      setLastInventoryPage: (pageUrl) => {
+        setStore({ lastInventoryPage: pageUrl });
+      },
+
+      // Obtiene la última página visitada
+      getLastInventoryPage: () => {
+        const { lastInventoryPage } = getStore();
+        return lastInventoryPage;
+      },
       // ------------------------------------
       // AUTH - Autenticación
       // ------------------------------------
@@ -871,6 +881,24 @@ updateSaleDetails: async (saleId, updatedData) => {
         return false;
       }
     },
+    fetchCloudinaryStats: async () => {
+      try {
+          const response = await fetch("http://localhost:3001/cloudinary/stats", {
+              method: "GET",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+          });
+          if (!response.ok) {
+              throw new Error("No se pudieron obtener las estadísticas de Cloudinary.");
+          }
+          const data = await response.json();
+          setStore({ cloudinaryStats: data });
+      } catch (error) {
+          console.error("Error obteniendo estadísticas de Cloudinary:", error);
+      }
+  },
+  
     
     
   
