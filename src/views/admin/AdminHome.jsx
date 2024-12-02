@@ -1,21 +1,16 @@
 import React, { useContext, useEffect } from "react";
-import {
-  Routes,
-  Route,
-  useNavigate,
-  Link,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useNavigate, Link, useLocation } from "react-router-dom";
 import { Context } from "../../store/context";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 import { FaUserCog, FaClipboardList, FaChartLine } from "react-icons/fa";
 import UserManagement from "../../components/admin/UserManagement";
 import InventoryManagement from "../../components/admin/InventoryManagement";
 import ViewAllSales from "../../components/admin/ViewAllSales";
-import SaleDetailsView from "../../components/admin/SaleDetailsView";
+import ComboManagement from "../../components/admin/ComboManagement";
 import AddProduct from "../../components/admin/AddProduct";
 import EditProduct from "../../components/admin/EditProduct";
-
+import EditCombo from "../../components/admin/EditCombo"; // Nuevo componente
+import CreateCombo from "../../components/admin/CreateCombo";
 
 const AdminHome = () => {
   const { store, actions } = useContext(Context);
@@ -106,12 +101,41 @@ const AdminHome = () => {
           </div>
           <div className="col-12 col-sm-6 col-md-4 mb-3">
             <Link
-              to="/admin/sales-report"
+              to="/admin/combo-management"
               className={`d-flex flex-column align-items-center text-decoration-none p-2 shadow-sm rounded ${
-                isActive("/admin/sales-report") ? "active-link" : "text-dark"
+                isActive("/admin/combo-management")
+                  ? "active-link"
+                  : "text-dark"
               }`}
               style={{
-                backgroundColor: isActive("/admin/sales-report")
+                backgroundColor: isActive("/admin/combo-management")
+                  ? "#343a40"
+                  : "#f8f9fa",
+              }}
+            >
+              <FaClipboardList
+                size={window.innerWidth < 768 ? 24 : 30}
+                className="mb-2"
+              />
+              <small
+                className={
+                  isActive("/admin/combo-management")
+                    ? "text-white"
+                    : "text-dark"
+                }
+              >
+                Gestión de Combos
+              </small>
+            </Link>
+          </div>
+          <div className="col-12 col-sm-6 col-md-4 mb-3">
+            <Link
+              to="/admin/sales-chart"
+              className={`d-flex flex-column align-items-center text-decoration-none p-2 shadow-sm rounded ${
+                isActive("/admin/sales-chart") ? "active-link" : "text-dark"
+              }`}
+              style={{
+                backgroundColor: isActive("/admin/sales-chart")
                   ? "#343a40"
                   : "#f8f9fa",
               }}
@@ -122,10 +146,12 @@ const AdminHome = () => {
               />
               <small
                 className={
-                  isActive("/admin/sales-report") ? "text-white" : "text-dark"
+                  isActive("/admin/sales-chart")
+                    ? "text-white"
+                    : "text-dark"
                 }
               >
-                Reporte de Ventas
+                Gráfica de Ventas
               </small>
             </Link>
           </div>
@@ -154,7 +180,7 @@ const AdminHome = () => {
                     : "text-dark"
                 }
               >
-                Ver Todas las Ventas
+                Gestionar Ventas
               </small>
             </Link>
           </div>
@@ -162,14 +188,14 @@ const AdminHome = () => {
 
         <Routes>
           <Route path="/user-management" element={<UserManagement />} />
-          <Route
-            path="/inventory-management"
-            element={<InventoryManagement />}
-          />
+          <Route path="/inventory-management" element={<InventoryManagement />} />
+          <Route path="/combo-management" element={<ComboManagement />} />
           <Route path="/view-admin-all-sales" element={<ViewAllSales />} />
-          <Route path="/view-admin-all-sales/view-details/:saleId" element={<SaleDetailsView />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product/:id" element={<EditProduct />} />
+          <Route path="/edit-combo/:id" element={<EditCombo />} />
+          <Route path="/create-combo" element={<CreateCombo />} />
+          
         </Routes>
       </div>
     </>

@@ -19,6 +19,8 @@ const getState = ({ getActions, getStore, setStore }) => {
       allSalesRequestByAdmin: [],
       cafes: [],
       lastInventoryPage: "/admin/inventory-management?page=1",
+      adminCombos: [],
+
       
     },
     actions: {
@@ -666,19 +668,19 @@ const getState = ({ getActions, getStore, setStore }) => {
       }
   },
   
-    fetchCafes: async () => {
-      try {
-        const response = await fetch("http://localhost:3001/cafe/");
-        if (response.ok) {
-          const data = await response.json();
-          setStore({ cafes: data });
-        } else {
-          console.error("Error al obtener las sedes de café:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error en fetchCafes:", error);
+  fetchCafes: async () => {
+    try {
+      const response = await fetch("http://localhost:3001/cafe/");
+      if (response.ok) {
+        const data = await response.json();
+        setStore({ cafes: data });
+      } else {
+        console.error("Error al obtener las sedes de café:", response.statusText);
       }
-    },
+    } catch (error) {
+      console.error("Error en fetchCafes:", error);
+    }
+  },
     fetchSaleDetails: async (saleId) => {
       try {
           const response = await fetch(`http://localhost:3001/sale_detail/${saleId}`);
@@ -898,6 +900,188 @@ updateSaleDetails: async (saleId, updatedData) => {
           console.error("Error obteniendo estadísticas de Cloudinary:", error);
       }
   },
+  fetchProductById: async (productId) => {
+    try {
+        const response = await fetch(`http://localhost:3001/product/${productId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error("Error al obtener el producto:", error);
+            return null;
+        }
+
+        const product = await response.json();
+        return product;
+    } catch (error) {
+        console.error("Error en fetchProductById:", error);
+        return null;
+    }
+},
+fetchAdminCombos: async () => {
+  try {
+      const response = await fetch("http://localhost:3001/combo_menu/admin-get-combos", {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+          },
+      });
+
+      if (!response.ok) {
+          const error = await response.json();
+          console.error("Error al obtener los combos:", error);
+          return;
+      }
+
+      const combos = await response.json();
+      setStore({ adminCombos: combos });
+  } catch (error) {
+      console.error("Error en fetchAdminCombos:", error);
+  }
+},
+fetchComboById: async (comboId) => {
+  try {
+    const response = await fetch(`http://localhost:3001/combo_menu/get-combo/${comboId}`);
+    if (!response.ok) throw new Error("Error al obtener el combo");
+    return await response.json();
+  } catch (error) {
+    console.error("Error en fetchComboById:", error);
+  }
+},
+
+searchProducts: async (term) => {
+  try {
+    const response = await fetch(`http://localhost:3001/combo_menu/search-products?term=${term}`);
+    if (!response.ok) throw new Error("Error al buscar productos");
+    return await response.json();
+  } catch (error) {
+    console.error("Error en searchProducts:", error);
+  }
+},
+
+updateCombo: async (comboId, comboData) => {
+  const { token } = getStore();
+
+  try {
+      const response = await fetch(`http://localhost:3001/combo_menu/update-combo/${comboId}`, {
+          method: "PUT",
+          headers: {
+              Authorization: `Bearer ${token}`, // Token incluido para autenticación
+          },
+          body: comboData, // Enviar el FormData directamente
+          credentials: "include", // Incluir credenciales
+      });
+
+      if (!response.ok) {
+          const error = await response.json();
+          console.error("Error al actualizar combo:", error);
+          return false;
+      }
+
+      const data = await response.json();
+
+      // Actualizar el estado del store para reflejar los cambios
+      const updatedCombos = getStore().adminCombos.map((combo) =>
+          combo.id === comboId ? data.combo : combo
+      );
+
+      setStore({ adminCombos: updatedCombos });
+      console.log("Combo actualizado exitosamente:", data);
+      return true;
+  } catch (error) {
+      console.error("Error en updateCombo:", error);
+      return false;
+  }
+},updateCombo: async (comboId, comboData) => {
+  try {
+      const response = await fetch(`http://localhost:3001/combo_menu/update-combo/${comboId}`, {
+          method: "PUT",
+          body: comboData, // Enviar FormData directamente
+          credentials: "include", // Incluir credenciales si es necesario
+      });
+
+      if (!response.ok) {
+          const error = await response.json();
+          console.error("Error al actualizar combo:", error);
+          return false;
+      }
+
+      const updatedCombo = await response.json();
+      console.log("Combo actualizado exitosamente:", updatedCombo);
+      return true;
+  } catch (error) {
+      console.error("Error en updateCombo:", error);
+      return false;
+  }
+},
+createCombo: async (comboData) => {
+  const { token } = getStore();
+
+  try {
+    const response = await fetch("http://localhost:3001/combo_menu/create", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`, // Si usas autenticación
+      },
+      body: comboData, // Enviar el FormData directamente
+      credentials: "include", // Incluir credenciales para cookies si es necesario
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Error al crear el combo:", error);
+      return false;
+    }
+
+    const data = await response.json();
+    console.log("Combo creado exitosamente:", data);
+    return true;
+  } catch (error) {
+    console.error("Error en createCombo:", error);
+    return false;
+  }
+},
+deleteCombo: async (comboId, adminPassword) => {
+  const { admin, token } = getStore();
+
+  try {
+    const response = await fetch(`http://localhost:3001/combo_menu/delete/${comboId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        admin_rut: admin.rut,
+        password: adminPassword,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error al eliminar el combo:", errorData);
+      return false;
+    }
+
+    // Actualizar la lista de combos después de eliminar
+    await getActions().fetchAdminCombos();
+    return true;
+  } catch (error) {
+    console.error("Error en deleteCombo:", error);
+    return false;
+  }
+},
+
+
+
+
+
+
   
     
     
