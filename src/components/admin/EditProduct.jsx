@@ -16,23 +16,44 @@ const EditProduct = () => {
     image: null,
   });
 
-  const [previewImage, setPreviewImage] = useState(""); // Vista previa de la imagen actual
+  const [previewImage, setPreviewImage] = useState("");
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [cafesLoaded, setCafesLoaded] = useState(false);
 
+  // Cargar datos iniciales
   useEffect(() => {
-    const product = store.adminProducts.find((p) => p.id === parseInt(id));
-    if (product) {
-      setFormData({
-        name: product.name,
-        price: product.price,
-        stock: product.stock,
-        product_category_id: product.product_category_id,
-        cafe_id: product.cafe_id,
-        image: null,
-      });
-      setPreviewImage(product.image_url);
-    }
-  }, [id, store.adminProducts]);
+    const fetchInitialData = async () => {
+      if (!store.cafes || store.cafes.length === 0) {
+        await actions.fetchCafes(); // Cargar sedes si no están cargadas
+      }
+      setCafesLoaded(true);
+
+      if (!store.productCategories || store.productCategories.length === 0) {
+        await actions.fetchProductCategories(); // Cargar categorías si no están cargadas
+      }
+
+      let product = store.adminProducts.find((p) => p.id === parseInt(id));
+      if (!product) {
+        product = await actions.fetchProductById(id);
+      }
+
+      if (product) {
+        setFormData({
+          name: product.name,
+          price: product.price,
+          stock: product.stock,
+          product_category_id: product.product_category_id,
+          cafe_id: product.cafe_id,
+          image: null,
+        });
+        setPreviewImage(product.image_url);
+      }
+      setIsLoading(false);
+    };
+
+    fetchInitialData();
+  }, [id, store.adminProducts, store.productCategories, store.cafes, actions]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,7 +63,7 @@ const EditProduct = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFormData({ ...formData, image: file });
-    setPreviewImage(URL.createObjectURL(file)); // Cambiar la vista previa
+    setPreviewImage(URL.createObjectURL(file));
   };
 
   const validate = () => {
@@ -50,7 +71,8 @@ const EditProduct = () => {
     if (!formData.name) newErrors.name = "El nombre es obligatorio.";
     if (!formData.price || formData.price <= 0) newErrors.price = "El precio debe ser mayor a 0.";
     if (!formData.stock || formData.stock < 0) newErrors.stock = "El stock no puede ser negativo.";
-    if (!formData.product_category_id) newErrors.product_category_id = "Selecciona una categoría.";
+    if (!formData.product_category_id)
+      newErrors.product_category_id = "Selecciona una categoría.";
     if (!formData.cafe_id) newErrors.cafe_id = "Selecciona una sede.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -72,11 +94,15 @@ const EditProduct = () => {
 
     const success = await actions.updateProduct(id, form);
     if (success) {
-      navigate(store.lastInventoryPage); // Volver a la última página visitada
+      navigate(store.lastInventoryPage);
     } else {
       alert("Hubo un error al actualizar el producto.");
     }
   };
+
+  if (isLoading || !cafesLoaded) {
+    return <div>Cargando datos del producto...</div>;
+  }
 
   return (
     <div className="container mt-4">
@@ -93,9 +119,7 @@ const EditProduct = () => {
         )}
 
         <div className="col-md-6">
-          <label htmlFor="name" className="form-label">
-            Nombre
-          </label>
+          <label htmlFor="name" className="form-label">Nombre</label>
           <input
             type="text"
             className={`form-control ${errors.name ? "is-invalid" : ""}`}
@@ -108,9 +132,7 @@ const EditProduct = () => {
         </div>
 
         <div className="col-md-6">
-          <label htmlFor="price" className="form-label">
-            Precio
-          </label>
+          <label htmlFor="price" className="form-label">Precio</label>
           <input
             type="number"
             className={`form-control ${errors.price ? "is-invalid" : ""}`}
@@ -123,9 +145,7 @@ const EditProduct = () => {
         </div>
 
         <div className="col-md-6">
-          <label htmlFor="stock" className="form-label">
-            Stock
-          </label>
+          <label htmlFor="stock" className="form-label">Stock</label>
           <input
             type="number"
             className={`form-control ${errors.stock ? "is-invalid" : ""}`}
@@ -138,9 +158,7 @@ const EditProduct = () => {
         </div>
 
         <div className="col-md-6">
-          <label htmlFor="product_category_id" className="form-label">
-            Categoría
-          </label>
+          <label htmlFor="product_category_id" className="form-label">Categoría</label>
           <select
             className={`form-select ${errors.product_category_id ? "is-invalid" : ""}`}
             id="product_category_id"
@@ -161,9 +179,7 @@ const EditProduct = () => {
         </div>
 
         <div className="col-md-6">
-          <label htmlFor="cafe_id" className="form-label">
-            Sede del Café
-          </label>
+          <label htmlFor="cafe_id" className="form-label">Sede del Café</label>
           <select
             className={`form-select ${errors.cafe_id ? "is-invalid" : ""}`}
             id="cafe_id"
@@ -182,23 +198,18 @@ const EditProduct = () => {
         </div>
 
         <div className="col-md-12">
-          <label htmlFor="image" className="form-label">
-            Imagen
-          </label>
+          <label htmlFor="image" className="form-label">Imagen</label>
           <input
             type="file"
-            className={`form-control ${errors.image ? "is-invalid" : ""}`}
+            className="form-control"
             id="image"
             name="image"
             onChange={handleFileChange}
           />
-          {errors.image && <div className="invalid-feedback">{errors.image}</div>}
         </div>
 
         <div className="col-12">
-          <button type="submit" className="btn btn-primary">
-            Guardar Cambios
-          </button>
+          <button type="submit" className="btn btn-primary">Guardar Cambios</button>
           <button
             type="button"
             className="btn btn-secondary ms-2"
