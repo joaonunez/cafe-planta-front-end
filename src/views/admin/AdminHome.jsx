@@ -13,7 +13,7 @@ import EditCombo from "../../components/admin/EditCombo"; // Nuevo componente
 import CreateCombo from "../../components/admin/CreateCombo";
 
 const AdminHome = () => {
-  const { store, actions } = useContext(Context);
+  const {store} = useContext(Context);
   const navigate = useNavigate();
   const location = useLocation();
 

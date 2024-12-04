@@ -14,41 +14,52 @@ const CustomerOrder = () => {
       }
     };
     fetchOrder();
-  }, []);
+  }, [actions]);
 
   if (!order) {
-    return <p>Loading...</p>;
+    return <p className="loading-text">Cargando detalles del pedido...</p>;
   }
 
   return (
-    <div className="container mt-4">
-      <h2>Historial de Compras</h2>
-      <h3>Detalles de tu Pedido</h3>
-      <p><strong>Fecha:</strong> {new Date(order.date).toLocaleString()}</p>
-      <p><strong>Total:</strong> ${order.total_amount.toLocaleString("es-CL")}</p>
-      <p><strong>Estado:</strong> {order.status}</p>
-      <p><strong>Comentarios:</strong> {order.comments || "Ninguno"}</p>
+    <div className="customer-order-container">
+      <h2 className="order-title">Historial de Compras</h2>
+      <div className="order-details">
+        <h3 className="order-subtitle">Detalles de tu Pedido</h3>
+        <p>
+          <strong>Fecha:</strong> {new Date(order.date).toLocaleString()}
+        </p>
+        <p>
+          <strong>Total:</strong> ${order.total_amount.toLocaleString("es-CL")}
+        </p>
+        <p>
+          <strong>Estado:</strong> {order.status}
+        </p>
+        <p>
+          <strong>Comentarios:</strong> {order.comments || "Ninguno"}
+        </p>
+      </div>
 
-      <h3>Detalles de los Items</h3>
-      <ul className="list-group">
-        {order.items.map((item, index) => (
-          <li key={index} className="list-group-item d-flex align-items-center">
-            <img
-              src={item.image_url || "/path-to-default-image.jpg"}
-              alt={item.name}
-              className="img-thumbnail me-3"
-              style={{ width: "60px", height: "60px" }}
-            />
-            <div>
-              <h5 className="mb-1">{item.name}</h5>
-              <p className="mb-1">
-                {item.quantity} x ${item.unit_price.toLocaleString("es-CL")}
-              </p>
-              <small>Total: ${(item.quantity * item.unit_price).toLocaleString("es-CL")}</small>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="order-items">
+        <h3 className="order-subtitle">Detalles de los Ítems</h3>
+        <ul className="item-list">
+          {order.items.map((item, index) => (
+            <li key={index} className="item-card">
+              <img
+                src={item.image_url || "/path-to-default-image.jpg"}
+                alt={item.name}
+                className="item-image"
+              />
+              <div className="item-details">
+                <h5>{item.name}</h5>
+                <p>
+                  {item.quantity} x ${item.unit_price.toLocaleString("es-CL")}
+                </p>
+                <small>Precio: ${(item.quantity * item.unit_price).toLocaleString("es-CL")}</small>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

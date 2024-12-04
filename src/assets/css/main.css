@@ -1,11 +1,22 @@
+/* Estilos generales */
 @import url('components/home/home.css');
-@import url('components/merchandise/product-card.css');
 @import url('components/butonizer/butonizer.css');
 @import url('components/spinner/spinner.css');
+
+/* Estilos de cartas */
 @import url('components/card/user-card.css');
-@import url('components/admin/user-management.css');
-@import url('components/admin/admin-navbar.css');
 @import url('components/card/admin-product-card.css');
-@import url('components/admin/inventoy-management.css');
 @import url('components/card/card-sales.css');
+
+/* Estilos de administración */
+@import url('components/admin/admin-navbar.css');
+@import url('components/admin/user-management.css');
+@import url('components/admin/inventoy-management.css');
+
+/* Estilos de mercancía */
+@import url('components/merchandise/product-card.css');
 @import url('components/merchandise/sale-details-view.css');
+
+/* Estilos del cliente */
+@import url('components/customer/customer-order.css');
+@import url('components/customer/customer-purchase-history.css');

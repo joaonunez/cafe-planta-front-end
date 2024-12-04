@@ -962,7 +962,6 @@ searchProducts: async (term) => {
     console.error("Error en searchProducts:", error);
   }
 },
-
 updateCombo: async (comboId, comboData) => {
   const { token } = getStore();
 
@@ -996,28 +995,9 @@ updateCombo: async (comboId, comboData) => {
       console.error("Error en updateCombo:", error);
       return false;
   }
-},updateCombo: async (comboId, comboData) => {
-  try {
-      const response = await fetch(`http://localhost:3001/combo_menu/update-combo/${comboId}`, {
-          method: "PUT",
-          body: comboData, // Enviar FormData directamente
-          credentials: "include", // Incluir credenciales si es necesario
-      });
-
-      if (!response.ok) {
-          const error = await response.json();
-          console.error("Error al actualizar combo:", error);
-          return false;
-      }
-
-      const updatedCombo = await response.json();
-      console.log("Combo actualizado exitosamente:", updatedCombo);
-      return true;
-  } catch (error) {
-      console.error("Error en updateCombo:", error);
-      return false;
-  }
 },
+
+
 createCombo: async (comboData) => {
   const { token } = getStore();
 
@@ -1074,6 +1054,33 @@ deleteCombo: async (comboId, adminPassword) => {
   } catch (error) {
     console.error("Error en deleteCombo:", error);
     return false;
+  }
+},
+fetchPurchaseHistory: async () => {
+  const { token } = getStore();
+  try {
+    const response = await fetch("http://localhost:3001/sale/purchase_history", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Error al obtener el historial de compras:", error);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.map((sale) => ({
+      ...sale,
+      items: sale.items || [], // Asegúrate de que siempre haya un array
+    }));
+  } catch (error) {
+    console.error("Error en fetchPurchaseHistory:", error);
+    return [];
   }
 },
 
