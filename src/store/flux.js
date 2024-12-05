@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 const getState = ({ getActions, getStore, setStore }) => {
   return {
     store: {
@@ -409,11 +410,13 @@ const getState = ({ getActions, getStore, setStore }) => {
     
         if (qrScanStatus === "processing") {
             console.warn("El QR Scan ya está en proceso, evitando múltiples solicitudes.");
-            return null; // Evita solicitudes repetitivas
+            return null; // Evitar solicitudes repetitivas
         }
     
+        const saleId = uuidv4(); // Generar un identificador único para esta venta
+    
         try {
-            setQrScanStatus("processing"); // Indicar que el escaneo está en proceso
+            setQrScanStatus("processing"); // Indicar que la venta está en proceso
     
             const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
                 method: "POST",
@@ -427,6 +430,7 @@ const getState = ({ getActions, getStore, setStore }) => {
                     comments,
                     cart_id: cartId,
                     dining_area_id: diningAreaId,
+                    sale_id: saleId, // Enviar el ID único
                 }),
             });
     
