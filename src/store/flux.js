@@ -1201,7 +1201,6 @@ scanQR: async (qrContent) => {
       return data;
   } catch (error) {
       console.error("Error en scanQR:", error.message);
-      Swal.fire("Error", error.message || "No se pudo procesar el QR", "error");
       return null;
   }
 },
