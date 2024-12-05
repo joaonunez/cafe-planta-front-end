@@ -22,6 +22,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       adminCombos: [],
       diningAreas: [],
       qrRead:null,
+      qrScanStatus: null,
 
       
     },
@@ -1175,9 +1176,24 @@ createDiningArea: async (number, cafeId) => {
       return false;
   }
 },
+setQrScanStatus: (status) => {
+  setStore({ qrScanStatus: status });
+},
+resetQrScanStatus: () => {
+  setStore({ qrScanStatus: null });
+},
 scanQR: async (qrContent) => {
-  const { token } = getStore();
+  const { token, qrScanStatus } = getStore();
+  const { setQrScanStatus, resetQrScanStatus } = getActions();
+
+  if (qrScanStatus === "processing") {
+    console.warn("QR Scan ya está en proceso, evitando múltiples solicitudes.");
+    return null; // Evitar solicitudes paralelas
+  }
+
   try {
+    setQrScanStatus("processing"); // Indicar que el escaneo está en proceso
+
     const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
       method: "POST",
       headers: {
@@ -1190,17 +1206,23 @@ scanQR: async (qrContent) => {
 
     if (!response.ok) {
       const error = await response.json();
+      setQrScanStatus("error"); // Indicar que hubo un error
       throw new Error(error.error || "Error al escanear el QR");
     }
 
     const data = await response.json();
     setStore({ qrRead: data });
+    setQrScanStatus("success"); // Escaneo exitoso
     return data;
   } catch (error) {
     console.error("Error en scanQR:", error.message);
+    setQrScanStatus("error"); // Indicar que hubo un error
     throw new Error(error.message || "No se pudo procesar el QR.");
+  } finally {
+    resetQrScanStatus(); // Restablecer estado una vez terminado
   }
 },
+
 
   
     
