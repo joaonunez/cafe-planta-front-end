@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useContext } from "react";
 import Swal from "sweetalert2";
 import { Html5QrcodeScanner } from "html5-qrcode";
-import { Context } from "../../store/context";
+import { Context } from "../../../store/context";
 
 const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
   const qrScannerRef = useRef(null);
