@@ -48,25 +48,28 @@ const Cart = () => {
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleQrDetected = async (qrContent) => {
-    // Lógica para procesar el QR detectado
-    const qrData = await actions.scanQR(qrContent);
-
-    if (!qrData) {
-      Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
-      return;
-    }
-
-    const { dining_area_id, cafe_id } = qrData;
-
-    // Si todo está bien, proceder con la compra
-    const success = await actions.createSale(totalPrice, "", cartItems, dining_area_id, cafe_id);
-    if (success) {
-      Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
-      navigate("/customer/purchase-history");
-    } else {
-      Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+    try {
+      const qrData = await actions.scanQR(qrContent);
+  
+      if (!qrData) {
+        throw new Error("No se pudo leer el QR o la mesa no existe.");
+      }
+  
+      const { id: dining_area_id } = qrData;
+  
+      const success = await actions.createSale(totalPrice, "", cartItems, dining_area_id);
+      if (success) {
+        await actions.clearCartItems(); // Limpiar carrito tras compra exitosa
+        Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
+        navigate("/customer/purchase-history");
+      } else {
+        throw new Error("Hubo un problema al realizar la compra. Inténtalo de nuevo.");
+      }
+    } catch (error) {
+      Swal.fire("Error", error.message || "No se pudo procesar la compra.", "error");
     }
   };
+  
 
   const handlePurchase = () => {
     setIsModalOpen(true); // Abrir el modal para escanear el QR
