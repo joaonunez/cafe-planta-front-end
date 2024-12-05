@@ -408,12 +408,14 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token, cartId, qrScanStatus } = getStore();
         const { setQrScanStatus, resetQrScanStatus } = getActions();
     
-        if (qrScanStatus !== "processing") {
-            console.warn("El estado del QR no es válido o ya no está en proceso.");
-            return null; // Evita solicitudes inválidas
+        if (qrScanStatus === "processing") {
+            console.warn("El QR Scan ya está en proceso, evitando múltiples solicitudes.");
+            return null; // Evitar solicitudes repetitivas
         }
     
         try {
+            setQrScanStatus("processing"); // Indicar que la venta está en proceso
+    
             const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
                 method: "POST",
                 headers: {
@@ -426,27 +428,29 @@ const getState = ({ getActions, getStore, setStore }) => {
                     comments,
                     cart_id: cartId,
                     dining_area_id: diningAreaId,
-                    qr_status: "processing", // Forzar el estado correcto al backend
+                    qr_status: qrScanStatus, // Estado del QR para validación
                 }),
             });
     
             if (!response.ok) {
                 const error = await response.json();
-                setQrScanStatus("error");
+                setQrScanStatus("error"); // Indicar error en el proceso
                 throw new Error(error.error || "Error al crear la venta");
             }
     
-            setQrScanStatus("success");
+            // Limpia el carrito y estado local tras éxito
             setStore({ cart: [], cartId: null });
+            setQrScanStatus("success");
             return true;
         } catch (error) {
             console.error("Error en createSale:", error);
             setQrScanStatus("error");
             throw new Error(error.message || "No se pudo crear la venta");
         } finally {
-            resetQrScanStatus();
+            resetQrScanStatus(); // Restablecer estado
         }
     },
+    
     
     
       

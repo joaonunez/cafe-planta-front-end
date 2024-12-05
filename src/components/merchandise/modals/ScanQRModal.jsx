@@ -38,33 +38,44 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
     }
   };
 
-  const handleQrDetected = async (decodedText) => {
-    if (store.qrScanStatus === "processing") return; // Evitar múltiples ejecuciones
+  const handleQrDetected = async (qrContent) => {
+    if (isProcessing) return; // Prevenir múltiples ejecuciones
 
-    actions.setQrScanStatus("processing");
+    setIsProcessing(true); // Bloquear interacción mientras se procesa
     try {
-      const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qr_content: decodedText }),
-      });
+        // Escanear el QR y procesar el pedido
+        const qrData = await actions.scanQR(qrContent);
 
-      if (!response.ok) {
-        const error = await response.json();
-        actions.setQrScanStatus("error");
-        throw new Error(error.error || "Error al procesar el QR");
-      }
+        if (!qrData) {
+            Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
+            return;
+        }
 
-      const data = await response.json();
-      actions.setQrScanStatus("success");
-      onQrDetected(data); // Notificar al padre sobre el QR detectado
-      onClose(); // Cerrar el modal
+        const { id: dining_area_id } = qrData;
+
+        // Crear la venta
+        const success = await actions.createSale(
+            cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0), // Total Amount
+            "", // Comments
+            cartItems, // Items in the cart
+            dining_area_id // Dining Area ID
+        );
+
+        if (success) {
+            Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
+            navigate("/customer/purchase-history");
+        } else {
+            Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+        }
     } catch (error) {
-      console.error("Error al procesar el QR:", error);
-      Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
-      actions.setQrScanStatus("error");
+        console.error("Error al procesar la venta:", error);
+        Swal.fire("Error", "Hubo un problema inesperado. Inténtalo de nuevo más tarde.", "error");
+    } finally {
+        setIsProcessing(false); // Liberar bloqueo
+        setIsModalOpen(false); // Cerrar el modal
     }
-  };
+};
+
 
   const handleQrError = (errorMessage) => {
     console.warn("QR Error:", errorMessage);
