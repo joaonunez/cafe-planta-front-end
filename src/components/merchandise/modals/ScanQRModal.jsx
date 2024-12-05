@@ -44,22 +44,30 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
     };
   }, [isOpen]);
 
-  const handleQrDetection = () => {
-    // Simulación de lectura QR para prueba
-    const simulatedQr = `{"id": 1, "number": 1, "cafe_id": 5}`;
+  const handleQrDetection = async () => {
     try {
-      const qrContent = JSON.parse(simulatedQr);
-      console.log("QR Detectado:", qrContent);
+      const qrContent = prompt("Escanea el QR o ingresa el contenido JSON del QR para pruebas:");
+      const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ qr_content: qrContent }),
+      });
 
-      if (!qrContent.id || !qrContent.cafe_id) {
-        throw new Error("El QR no tiene el formato esperado.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al procesar el QR");
       }
 
-      onQrDetected(qrContent);
+      const data = await response.json();
+      console.log("QR Procesado:", data);
+      Swal.fire("Éxito", "Mesa validada correctamente", "success");
+      onQrDetected(data);
       onClose();
     } catch (error) {
       console.error("Error al procesar el QR:", error);
-      Swal.fire("Error", "El QR no tiene un formato válido. Inténtalo de nuevo.", "error");
+      Swal.fire("Error", error.message || "No se pudo procesar el QR", "error");
     }
   };
 
@@ -88,7 +96,7 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
             onClick={handleQrDetection}
             disabled={!!error}
           >
-            Simular detección de QR
+            Procesar QR
           </button>
         </div>
       </div>
