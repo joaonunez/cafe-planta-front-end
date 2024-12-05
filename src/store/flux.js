@@ -1175,6 +1175,12 @@ createDiningArea: async (number, cafeId) => {
 scanQR: async (qrContent) => {
   const { token } = getStore();
   try {
+      // Validar que qrContent sea un objeto JSON válido con id y cafe_id
+      const parsedQR = JSON.parse(qrContent);
+      if (!parsedQR.id || !parsedQR.cafe_id) {
+          throw new Error("El QR no contiene información válida");
+      }
+
       const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
           method: "POST",
           headers: {
@@ -1194,13 +1200,11 @@ scanQR: async (qrContent) => {
       setStore({ qrRead: data });
       return data;
   } catch (error) {
-      console.error("Error en scanQR:", error);
+      console.error("Error en scanQR:", error.message);
+      Swal.fire("Error", error.message || "No se pudo procesar el QR", "error");
       return null;
   }
 },
-
-
-
 
 
 
