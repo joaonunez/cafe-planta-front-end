@@ -37,30 +37,27 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
     }
   };
 
-  const handleQrDetected = async (qrContent) => {
-    const validation = await actions.validateLatestOrder();
-    if (!validation.canCreateOrder) {
-      Swal.fire("No permitido", validation.message, "warning");
-      return;
-    }
-  
-    // Continuar con la creación de la venta si pasa la validación
-    const qrData = await actions.scanQR(qrContent);
-    if (!qrData) {
-      Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
-      return;
-    }
-  
-    const { dining_area_id } = qrData;
-    const success = await actions.createSale(totalPrice, "", cartItems, dining_area_id);
-    if (success) {
-      Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
-      navigate("/customer/purchase-history");
-    } else {
-      Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+  const handleQrDetected = async (decodedText) => {
+    try {
+      const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qr_content: decodedText }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Error al procesar el QR");
+      }
+
+      const data = await response.json();
+      onQrDetected(data);
+      onClose();
+    } catch (error) {
+      console.error("Error al procesar el QR:", error);
+      Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
     }
   };
-  
 
   const handleQrError = (errorMessage) => {
     console.warn("QR Error:", errorMessage);
