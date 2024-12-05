@@ -408,16 +408,12 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token, cartId, qrScanStatus } = getStore();
         const { setQrScanStatus, resetQrScanStatus } = getActions();
     
-        if (qrScanStatus === "processing") {
-            console.warn("El QR Scan ya está en proceso, evitando múltiples solicitudes.");
-            return null; // Evitar solicitudes repetitivas
+        if (qrScanStatus !== "processing") {
+            console.warn("El estado del QR no es válido o ya no está en proceso.");
+            return null; // Evita solicitudes inválidas
         }
     
-        const saleId = uuidv4(); // Generar un identificador único para esta venta
-    
         try {
-            setQrScanStatus("processing"); // Indicar que la venta está en proceso
-    
             const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
                 method: "POST",
                 headers: {
@@ -430,28 +426,28 @@ const getState = ({ getActions, getStore, setStore }) => {
                     comments,
                     cart_id: cartId,
                     dining_area_id: diningAreaId,
-                    sale_id: saleId, // Enviar el ID único
+                    qr_status: "processing", // Forzar el estado correcto al backend
                 }),
             });
     
             if (!response.ok) {
                 const error = await response.json();
-                setQrScanStatus("error"); // Indicar error en el proceso
+                setQrScanStatus("error");
                 throw new Error(error.error || "Error al crear la venta");
             }
     
-            // Limpia el carrito y estado local tras éxito
-            setStore({ cart: [], cartId: null });
             setQrScanStatus("success");
+            setStore({ cart: [], cartId: null });
             return true;
         } catch (error) {
             console.error("Error en createSale:", error);
             setQrScanStatus("error");
             throw new Error(error.message || "No se pudo crear la venta");
         } finally {
-            resetQrScanStatus(); // Restablecer estado
+            resetQrScanStatus();
         }
     },
+    
     
       
     
