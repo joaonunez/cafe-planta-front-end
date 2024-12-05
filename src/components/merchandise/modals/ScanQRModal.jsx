@@ -68,7 +68,14 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected, cartItems }) => {
         }
     } catch (error) {
         console.error("Error al procesar el QR:", error);
-        Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
+
+        // Mostrar el mensaje de error que viene del backend, si está disponible
+        const errorMessage =
+            error.response?.data?.error || // Mensaje de error en el cuerpo de la respuesta
+            error.message || // Mensaje de error general
+            "No se pudo procesar el QR.";
+
+        Swal.fire("Error", errorMessage, "error");
     } finally {
         actions.resetQrScanStatus(); // Restablecer el estado
     }
