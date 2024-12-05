@@ -1,5 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import { Routes, Route, useNavigate, Link, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import { Context } from "../../store/context";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 import { FaUserCog, FaClipboardList, FaChartLine } from "react-icons/fa";
@@ -11,9 +17,11 @@ import AddProduct from "../../components/admin/AddProduct";
 import EditProduct from "../../components/admin/EditProduct";
 import EditCombo from "../../components/admin/EditCombo"; // Nuevo componente
 import CreateCombo from "../../components/admin/CreateCombo";
+import ManageDiningAreas from "../../components/admin/ManageDiningAreas";
+import CreateDiningAreaForm from "../../components/admin/CreateDiningArea";
 
 const AdminHome = () => {
-  const {store} = useContext(Context);
+  const { store } = useContext(Context);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -130,6 +138,35 @@ const AdminHome = () => {
           </div>
           <div className="col-12 col-sm-6 col-md-4 mb-3">
             <Link
+              to="/admin/manage-dining-areas"
+              className={`d-flex flex-column align-items-center text-decoration-none p-2 shadow-sm rounded ${
+                isActive("/admin/manage-dining-areas")
+                  ? "active-link"
+                  : "text-dark"
+              }`}
+              style={{
+                backgroundColor: isActive("/admin/manage-dining-areas")
+                  ? "#343a40"
+                  : "#f8f9fa",
+              }}
+            >
+              <FaClipboardList
+                size={window.innerWidth < 768 ? 24 : 30}
+                className="mb-2"
+              />
+              <small
+                className={
+                  isActive("/admin/manage-dining-areas")
+                    ? "text-white"
+                    : "text-dark"
+                }
+              >
+                Gestionar Mesas
+              </small>
+            </Link>
+          </div>
+          <div className="col-12 col-sm-6 col-md-4 mb-3">
+            <Link
               to="/admin/sales-chart"
               className={`d-flex flex-column align-items-center text-decoration-none p-2 shadow-sm rounded ${
                 isActive("/admin/sales-chart") ? "active-link" : "text-dark"
@@ -146,9 +183,7 @@ const AdminHome = () => {
               />
               <small
                 className={
-                  isActive("/admin/sales-chart")
-                    ? "text-white"
-                    : "text-dark"
+                  isActive("/admin/sales-chart") ? "text-white" : "text-dark"
                 }
               >
                 Gráfica de Ventas
@@ -188,14 +223,18 @@ const AdminHome = () => {
 
         <Routes>
           <Route path="/user-management" element={<UserManagement />} />
-          <Route path="/inventory-management" element={<InventoryManagement />} />
+          <Route
+            path="/inventory-management"
+            element={<InventoryManagement />}
+          />
           <Route path="/combo-management" element={<ComboManagement />} />
           <Route path="/view-admin-all-sales" element={<ViewAllSales />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product/:id" element={<EditProduct />} />
           <Route path="/edit-combo/:id" element={<EditCombo />} />
           <Route path="/create-combo" element={<CreateCombo />} />
-          
+          <Route path="/manage-dining-areas" element={<ManageDiningAreas />} />
+          <Route path="/create-dining-area" element={<CreateDiningAreaForm />} />
         </Routes>
       </div>
     </>

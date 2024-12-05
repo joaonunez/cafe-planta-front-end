@@ -20,3 +20,5 @@
 /* Estilos del cliente */
 @import url('components/customer/customer-order.css');
 @import url('components/customer/customer-purchase-history.css');
+
+@import url('components/employee/view-order-details-modal.css');

@@ -12,7 +12,7 @@ const ViewAllSales = () => {
         if (!store.allSalesRequestByAdmin.length) {
             actions.fetchAllSalesRequestByAdmin();
         }
-    }, [store.allSalesRequestByAdmin.length, actions]);
+    }, [store.allSalesRequestByAdmin.length]);
 
     const handleDeleteSale = (saleId) => {
         if (window.confirm(`¿Estás seguro de que deseas eliminar la venta con ID ${saleId}?`)) {

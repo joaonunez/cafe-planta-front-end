@@ -20,6 +20,8 @@ const getState = ({ getActions, getStore, setStore }) => {
       cafes: [],
       lastInventoryPage: "/admin/inventory-management?page=1",
       adminCombos: [],
+      diningAreas: [],
+      qrRead:null,
 
       
     },
@@ -400,14 +402,8 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       // SALES - Ventas
       // ------------------------------------
-      createSale: async (totalAmount, comments) => {
-        const { token, cartId } = getStore();
-    
-        if (!cartId) {
-            console.error("Error: No se encontró cartId en el store.");
-            return false;
-        }
-    
+      createSale: async (totalAmount, comments, cartItems, diningAreaId) => {
+        const { token } = getStore();
         try {
             const response = await fetch("http://localhost:3001/sale/create", {
                 method: "POST",
@@ -416,19 +412,26 @@ const getState = ({ getActions, getStore, setStore }) => {
                     Authorization: `Bearer ${token}`,
                 },
                 credentials: "include",
-                body: JSON.stringify({ total_amount: totalAmount, comments, cart_id: cartId }),
+                body: JSON.stringify({
+                    total_amount: totalAmount,
+                    comments,
+                    cart_id: getStore().cartId,
+                    dining_area_id: diningAreaId,
+                }),
             });
     
-            if (!response.ok) throw new Error("Failed to create sale");
-            setStore({ cart: [] });
-            await getActions().clearCartItems();
-            await getActions().deleteCart();
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Error al crear la venta");
+            }
+    
             return true;
         } catch (error) {
-            console.error("Error creating sale:", error);
+            console.error("Error en createSale:", error);
             return false;
         }
     },
+    
     
 
       getLatestOrder: async () => {
@@ -1081,6 +1084,118 @@ fetchPurchaseHistory: async () => {
   } catch (error) {
     console.error("Error en fetchPurchaseHistory:", error);
     return [];
+  }
+},
+fetchOrderDetails: async (orderId) => {
+  const { token } = getStore();
+  try {
+    const response = await fetch(`http://localhost:3001/sale/order_details/${orderId}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error("Error al obtener los detalles del pedido");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error en fetchOrderDetails:", error);
+    return null;
+  }
+},
+validateLatestOrder: async () => {
+  const { token } = getStore();
+  try {
+      const response = await fetch("http://localhost:3001/sale/validate_latest_order", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
+      });
+
+      if (!response.ok) {
+          const error = await response.json();
+          console.error("Error al validar el último pedido:", error.message || error);
+          return { canCreateOrder: false, message: error.message || "Error desconocido" };
+      }
+
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error("Error al validar el último pedido:", error);
+      return { canCreateOrder: false, message: "Error en la conexión con el servidor" };
+  }
+},
+fetchDiningAreas: async () => {
+  const { token } = getStore();
+  try {
+      const response = await fetch("http://localhost:3001/dining_area/list", {
+          method: "GET",
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Error al obtener las mesas disponibles");
+
+      const data = await response.json();
+      setStore({ diningAreas: data });
+  } catch (error) {
+      console.error("Error en fetchDiningAreas:", error);
+      setStore({ diningAreas: [] }); // Asegurarse de que diningAreas no sea undefined
+  }
+},
+createDiningArea: async (number, cafeId) => {
+  const { token } = getStore();
+  try {
+      const response = await fetch("http://localhost:3001/dining_area/create", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({ number, cafe_id: cafeId }),
+      });
+
+      if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Error al crear la mesa");
+      }
+
+      const data = await response.json();
+      const { diningAreas } = getStore();
+      setStore({ diningAreas: [...diningAreas, data] });
+      return true;
+  } catch (error) {
+      console.error("Error en createDiningArea:", error);
+      return false;
+  }
+},
+scanQR: async (qrContent) => {
+  const { token } = getStore();
+  try {
+      const response = await fetch("http://localhost:3001/dining_area/scan_qr", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({ qr_content: qrContent }),
+      });
+
+      if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Error al escanear el QR");
+      }
+
+      const data = await response.json();
+      setStore({ qrRead: data });
+      return data;
+  } catch (error) {
+      console.error("Error en scanQR:", error);
+      return null;
   }
 },
 

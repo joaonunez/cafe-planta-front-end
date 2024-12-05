@@ -1,13 +1,14 @@
-// Cart.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../../store/context";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaPlus, FaMinus } from "react-icons/fa";
+import ScanQrModal from "./modals/ScanQRModal";
 
 const Cart = () => {
   const { store, actions } = useContext(Context);
   const [cartItems, setCartItems] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,14 +47,29 @@ const Cart = () => {
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-  const handlePurchase = async () => {
-    const success = await actions.createSale(totalPrice, "", cartItems);
+  const handleQrDetected = async (qrContent) => {
+    // Lógica para procesar el QR detectado
+    const qrData = await actions.scanQR(qrContent);
+
+    if (!qrData) {
+      Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
+      return;
+    }
+
+    const { dining_area_id, cafe_id } = qrData;
+
+    // Si todo está bien, proceder con la compra
+    const success = await actions.createSale(totalPrice, "", cartItems, dining_area_id, cafe_id);
     if (success) {
       Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
       navigate("/customer/purchase-history");
     } else {
       Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
     }
+  };
+
+  const handlePurchase = () => {
+    setIsModalOpen(true); // Abrir el modal para escanear el QR
   };
 
   return (
@@ -118,6 +134,11 @@ const Cart = () => {
           </button>
         </div>
       )}
+      <ScanQrModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onQrDetected={handleQrDetected}
+      />
     </div>
   );
 };
