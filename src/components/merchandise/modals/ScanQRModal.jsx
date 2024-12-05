@@ -17,26 +17,17 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
   }, [isOpen]);
 
   const startQrScanner = () => {
-    if (qrScannerRef.current) {
-      return;
-    }
+    if (qrScannerRef.current) return;
 
     const config = {
-      fps: 10, // Frames per second
-      qrbox: { width: 250, height: 250 }, // Tamaño de la caja de escaneo
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
       aspectRatio: 1.0,
     };
 
-    qrScannerRef.current = new Html5QrcodeScanner(
-      "qr-reader",
-      config,
-      /* verbose= */ false
-    );
+    qrScannerRef.current = new Html5QrcodeScanner("qr-reader", config, false);
 
-    qrScannerRef.current.render(
-      handleQrDetected,
-      handleQrError
-    );
+    qrScannerRef.current.render(handleQrDetected, handleQrError);
   };
 
   const stopQrScanner = () => {
@@ -50,25 +41,21 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
     try {
       const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ qr_content: decodedText }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al procesar el QR");
+        const error = await response.json();
+        throw new Error(error.error || "Error al procesar el QR");
       }
 
       const data = await response.json();
-      console.log("QR Procesado:", data);
-      Swal.fire("Éxito", "Mesa validada correctamente", "success");
       onQrDetected(data);
       onClose();
     } catch (error) {
       console.error("Error al procesar el QR:", error);
-      Swal.fire("Error", error.message || "No se pudo procesar el QR", "error");
+      Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
     }
   };
 

@@ -1175,37 +1175,29 @@ createDiningArea: async (number, cafeId) => {
 scanQR: async (qrContent) => {
   const { token } = getStore();
   try {
-      // Validar que qrContent sea un objeto JSON válido con id y cafe_id
-      const parsedQR = JSON.parse(qrContent);
-      if (!parsedQR.id || !parsedQR.cafe_id) {
-          throw new Error("El QR no contiene información válida");
-      }
+    const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      body: JSON.stringify({ qr_content: qrContent }),
+    });
 
-      const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({ qr_content: qrContent }),
-      });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Error al escanear el QR");
+    }
 
-      if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Error al escanear el QR");
-      }
-
-      const data = await response.json();
-      setStore({ qrRead: data });
-      return data;
+    const data = await response.json();
+    setStore({ qrRead: data });
+    return data;
   } catch (error) {
-      console.error("Error en scanQR:", error.message);
-      return null;
+    console.error("Error en scanQR:", error.message);
+    throw new Error(error.message || "No se pudo procesar el QR.");
   }
 },
-
-
 
   
     
