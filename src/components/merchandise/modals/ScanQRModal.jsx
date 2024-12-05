@@ -32,12 +32,18 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
 
   const stopQrScanner = () => {
     if (qrScannerRef.current) {
-      qrScannerRef.current.clear().catch((err) => console.error("Error al detener el escáner:", err));
+      qrScannerRef.current.clear().catch((err) =>
+        console.error("Error al detener el escáner:", err)
+      );
       qrScannerRef.current = null;
     }
   };
 
   const handleQrDetected = async (decodedText) => {
+    // Detener el escáner y cerrar el modal de inmediato
+    stopQrScanner();
+    onClose();
+
     try {
       const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
         method: "POST",
@@ -52,7 +58,6 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
 
       const data = await response.json();
       onQrDetected(data);
-      onClose();
     } catch (error) {
       console.error("Error al procesar el QR:", error);
       Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
