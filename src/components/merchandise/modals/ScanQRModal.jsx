@@ -42,40 +42,38 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected, cartItems }) => {
   };
 
   const handleQrDetected = async (qrContent) => {
-    if (isProcessing) return; // Prevenir múltiples ejecuciones
+    if (store.qrScanStatus === "processing") return; // Evitar múltiples ejecuciones
 
-    setIsProcessing(true); // Bloquear interacción mientras se procesa
     try {
-      const qrData = await actions.scanQR(qrContent);
+        const qrData = await actions.scanQR(qrContent);
 
-      if (!qrData) {
-        Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
-        return;
-      }
+        if (!qrData || !qrData.id || !qrData.cafe_id) {
+            Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
+            return;
+        }
 
-      const { id: dining_area_id } = qrData;
+        // Crear la venta
+        const success = await actions.createSale(
+            cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
+            "", // Comments
+            cartItems,
+            qrData.id
+        );
 
-      const success = await actions.createSale(
-        cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0), // Total Amount
-        "", // Comments
-        cartItems, // Items in the cart
-        dining_area_id // Dining Area ID
-      );
-
-      if (success) {
-        Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
-        navigate("/customer/purchase-history");
-      } else {
-        Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
-      }
+        if (success) {
+            Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
+            navigate("/customer/purchase-history");
+        } else {
+            Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+        }
     } catch (error) {
-      console.error("Error al procesar la venta:", error);
-      Swal.fire("Error", "Hubo un problema inesperado. Inténtalo de nuevo más tarde.", "error");
+        console.error("Error al procesar el QR:", error);
+        Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
     } finally {
-      setIsProcessing(false); // Liberar bloqueo
-      onClose(); // Cerrar el modal
+        actions.resetQrScanStatus(); // Restablecer el estado
     }
-  };
+};
+
 
   const handleQrError = (errorMessage) => {
     console.warn("QR Error:", errorMessage);
