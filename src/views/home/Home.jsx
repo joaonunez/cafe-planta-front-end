@@ -12,7 +12,7 @@ const Home = () => {
                     <p className="lead mb-4">Descubre nuestros deliciosos productos y ofertas exclusivas.</p>
 
                     <div className="product-demo mb-3">
-                        <h2 className="mb-4">Aquí Podrás Encontrar</h2>
+                        <h2 className="mb-4">Aquí Podrás Encontrar Copete</h2>
                         <div className="d-flex flex-column flex-md-row justify-content-center">
                             <div className="product-item p-3 m-2 bg-secondary rounded shadow-sm text-center">
                                 <FaCoffee size={50} className="text-warning mb-3" />
