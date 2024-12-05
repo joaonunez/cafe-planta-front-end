@@ -9,6 +9,7 @@ const Cart = () => {
   const { store, actions } = useContext(Context);
   const [cartItems, setCartItems] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
+  const [isProcessing, setIsProcessing] = useState(false); // Estado para evitar múltiples solicitudes
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,57 +20,52 @@ const Cart = () => {
     setCartItems(Array.isArray(store.cart) ? store.cart : []);
   }, [store.cart]);
 
-  const handleQuantityChange = (item, newQuantity) => {
-    if (newQuantity < 1) return;
-    actions.updateCartItemQuantity(item.id, newQuantity);
-    setCartItems((prevItems) =>
-      prevItems.map((cartItem) =>
-        cartItem.id === item.id ? { ...cartItem, quantity: newQuantity } : cartItem
-      )
-    );
-  };
-
-  const handleRemoveItem = (item) => {
-    Swal.fire({
-      title: "¿Eliminar del carrito?",
-      text: `¿Estás seguro de que deseas eliminar "${item.name}" del carrito?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        actions.removeFromCart(item.id);
-        Swal.fire("Eliminado", `"${item.name}" ha sido eliminado del carrito.`, "success");
-      }
-    });
-  };
-
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
   const handleQrDetected = async (qrContent) => {
-    // Lógica para procesar el QR detectado
-    const qrData = await actions.scanQR(qrContent);
+    if (isProcessing) return; // Prevenir múltiples ejecuciones
 
-    if (!qrData) {
-      Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
-      return;
-    }
+    setIsProcessing(true); // Bloquear interacción mientras se procesa
+    try {
+      // Escanear el QR y procesar el pedido
+      const qrData = await actions.scanQR(qrContent);
 
-    const { dining_area_id, cafe_id } = qrData;
+      if (!qrData) {
+        Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
+        return;
+      }
 
-    // Si todo está bien, proceder con la compra
-    const success = await actions.createSale(totalPrice, "", cartItems, dining_area_id, cafe_id);
-    if (success) {
-      Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
-      navigate("/customer/purchase-history");
-    } else {
-      Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+      const { id: dining_area_id } = qrData;
+
+      // Crear la venta
+      const success = await actions.createSale(
+        cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0), // Total Amount
+        "", // Comments
+        cartItems, // Items in the cart
+        dining_area_id // Dining Area ID
+      );
+
+      if (success) {
+        Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
+        navigate("/customer/purchase-history");
+      } else {
+        Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+      }
+    } catch (error) {
+      console.error("Error al procesar la venta:", error);
+      Swal.fire("Error", "Hubo un problema inesperado. Inténtalo de nuevo más tarde.", "error");
+    } finally {
+      setIsProcessing(false); // Liberar bloqueo
+      setIsModalOpen(false); // Cerrar el modal
     }
   };
 
   const handlePurchase = () => {
+    if (isProcessing) return; // Prevenir clics múltiples
     setIsModalOpen(true); // Abrir el modal para escanear el QR
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setIsProcessing(false); // Resetear el estado de procesamiento al cerrar el modal
   };
 
   return (
@@ -101,14 +97,14 @@ const Cart = () => {
                     <div className="d-flex align-items-center">
                       <button
                         className="btn btn-outline-secondary btn-sm"
-                        onClick={() => handleQuantityChange(item, item.quantity - 1)}
+                        onClick={() => actions.updateCartItemQuantity(item.id, item.quantity - 1)}
                       >
                         <FaMinus />
                       </button>
                       <span className="mx-2">{item.quantity}</span>
                       <button
                         className="btn btn-outline-secondary btn-sm"
-                        onClick={() => handleQuantityChange(item, item.quantity + 1)}
+                        onClick={() => actions.updateCartItemQuantity(item.id, item.quantity + 1)}
                       >
                         <FaPlus />
                       </button>
@@ -116,7 +112,7 @@ const Cart = () => {
                   </div>
                   <button
                     className="btn btn-danger mt-2 w-100"
-                    onClick={() => handleRemoveItem(item)}
+                    onClick={() => actions.removeFromCart(item.id)}
                   >
                     Eliminar
                   </button>
@@ -128,15 +124,19 @@ const Cart = () => {
       )}
       {cartItems.length > 0 && (
         <div className="mt-4">
-          <h4>Total: ${totalPrice.toLocaleString("es-CL")}</h4>
-          <button className="btn btn-primary w-100" onClick={handlePurchase}>
-            Comprar
+          <h4>Total: ${cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toLocaleString("es-CL")}</h4>
+          <button
+            className="btn btn-primary w-100"
+            onClick={handlePurchase}
+            disabled={isProcessing} // Deshabilitar botón si está procesando
+          >
+            {isProcessing ? "Procesando..." : "Comprar"}
           </button>
         </div>
       )}
       <ScanQrModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose} // Manejar cierre seguro
         onQrDetected={handleQrDetected}
       />
     </div>
