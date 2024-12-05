@@ -403,34 +403,37 @@ const getState = ({ getActions, getStore, setStore }) => {
       // SALES - Ventas
       // ------------------------------------
       createSale: async (totalAmount, comments, cartItems, diningAreaId) => {
-        const { token } = getStore();
+        const { token, cartId } = getStore();
         try {
-            const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    total_amount: totalAmount,
-                    comments,
-                    cart_id: getStore().cartId,
-                    dining_area_id: diningAreaId,
-                }),
-            });
-    
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Error al crear la venta");
-            }
-    
-            return true;
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              total_amount: totalAmount,
+              comments,
+              cart_id: cartId,
+              dining_area_id: diningAreaId,
+            }),
+          });
+      
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Error al crear la venta");
+          }
+      
+          // Limpia el carrito local después de una venta exitosa
+          setStore({ cart: [], cartId: null });
+          return true;
         } catch (error) {
-            console.error("Error en createSale:", error);
-            return false;
+          console.error("Error en createSale:", error);
+          throw new Error(error.message || "No se pudo crear la venta");
         }
-    },
+      },
+      
     
     
 
