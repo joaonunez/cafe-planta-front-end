@@ -33,7 +33,7 @@ const Cart = () => {
         return;
       }
 
-      const { dining_area_id } = qrData;
+      const { id: dining_area_id } = qrData;
 
       // Crear la venta
       const success = await actions.createSale(
@@ -61,6 +61,11 @@ const Cart = () => {
   const handlePurchase = () => {
     if (isProcessing) return; // Prevenir clics múltiples
     setIsModalOpen(true); // Abrir el modal para escanear el QR
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setIsProcessing(false); // Resetear el estado de procesamiento al cerrar el modal
   };
 
   return (
@@ -131,7 +136,7 @@ const Cart = () => {
       )}
       <ScanQrModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose} // Manejar cierre seguro
         onQrDetected={handleQrDetected}
       />
     </div>
