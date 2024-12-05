@@ -4,6 +4,7 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 
 const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
   const qrScannerRef = useRef(null);
+  const [isProcessing, setIsProcessing] = useState(false); // Para evitar múltiples solicitudes
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -38,6 +39,9 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
   };
 
   const handleQrDetected = async (decodedText) => {
+    if (isProcessing) return; // Evitar múltiples solicitudes
+
+    setIsProcessing(true); // Bloquear el procesamiento adicional
     try {
       const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
         method: "POST",
@@ -51,11 +55,13 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
       }
 
       const data = await response.json();
-      onQrDetected(data);
-      onClose();
+      onQrDetected(data); // Notificar al padre sobre el QR detectado
+      onClose(); // Cerrar el modal
+      setIsProcessing(false); // Liberar el bloqueo
     } catch (error) {
       console.error("Error al procesar el QR:", error);
       Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
+      setIsProcessing(false); // Liberar el bloqueo
     }
   };
 
@@ -74,8 +80,8 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
           <h2>Escanea el QR</h2>
           <div id="qr-reader" style={{ width: "100%" }} />
           {error && <p className="text-danger">{error}</p>}
-          <button className="btn btn-danger mt-3" onClick={onClose}>
-            Cancelar
+          <button className="btn btn-danger mt-3" onClick={onClose} disabled={isProcessing}>
+            {isProcessing ? "Procesando..." : "Cancelar"}
           </button>
         </div>
       </div>
