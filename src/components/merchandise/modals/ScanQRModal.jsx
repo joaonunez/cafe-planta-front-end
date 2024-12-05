@@ -45,11 +45,22 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
   }, [isOpen]);
 
   const handleQrDetection = () => {
-    // Aquí puedes implementar un lector QR o enviar el stream para analizarlo.
-    // Simularemos la detección de un QR.
-    const simulatedQr = "mesa_id=1&cafe_id=5";
-    onQrDetected(simulatedQr);
-    onClose();
+    // Simulación de lectura QR para prueba
+    const simulatedQr = `{"id": 1, "number": 1, "cafe_id": 5}`;
+    try {
+      const qrContent = JSON.parse(simulatedQr);
+      console.log("QR Detectado:", qrContent);
+
+      if (!qrContent.id || !qrContent.cafe_id) {
+        throw new Error("El QR no tiene el formato esperado.");
+      }
+
+      onQrDetected(qrContent);
+      onClose();
+    } catch (error) {
+      console.error("Error al procesar el QR:", error);
+      Swal.fire("Error", "El QR no tiene un formato válido. Inténtalo de nuevo.", "error");
+    }
   };
 
   return (
