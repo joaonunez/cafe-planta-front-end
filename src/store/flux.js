@@ -404,36 +404,51 @@ const getState = ({ getActions, getStore, setStore }) => {
       // SALES - Ventas
       // ------------------------------------
       createSale: async (totalAmount, comments, cartItems, diningAreaId) => {
-        const { token, cartId } = getStore();
-        try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              total_amount: totalAmount,
-              comments,
-              cart_id: cartId,
-              dining_area_id: diningAreaId,
-            }),
-          });
-      
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || "Error al crear la venta");
-          }
-      
-          // Limpia el carrito local después de una venta exitosa
-          setStore({ cart: [], cartId: null });
-          return true;
-        } catch (error) {
-          console.error("Error en createSale:", error);
-          throw new Error(error.message || "No se pudo crear la venta");
+        const { token, cartId, qrScanStatus } = getStore();
+        const { setQrScanStatus, resetQrScanStatus } = getActions();
+    
+        if (qrScanStatus === "processing") {
+            console.warn("El QR Scan ya está en proceso, evitando múltiples solicitudes.");
+            return null; // Evita solicitudes repetitivas
         }
-      },
+    
+        try {
+            setQrScanStatus("processing"); // Indicar que el escaneo está en proceso
+    
+            const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    total_amount: totalAmount,
+                    comments,
+                    cart_id: cartId,
+                    dining_area_id: diningAreaId,
+                }),
+            });
+    
+            if (!response.ok) {
+                const error = await response.json();
+                setQrScanStatus("error"); // Indicar error en el proceso
+                throw new Error(error.error || "Error al crear la venta");
+            }
+    
+            // Limpia el carrito y estado local tras éxito
+            setStore({ cart: [], cartId: null });
+            setQrScanStatus("success");
+            return true;
+        } catch (error) {
+            console.error("Error en createSale:", error);
+            setQrScanStatus("error");
+            throw new Error(error.message || "No se pudo crear la venta");
+        } finally {
+            resetQrScanStatus(); // Restablecer estado
+        }
+    },
+    
       
     
     
