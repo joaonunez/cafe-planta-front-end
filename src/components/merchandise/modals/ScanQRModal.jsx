@@ -4,7 +4,7 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../../../store/context";
 
-const ScanQrModal = ({ isOpen, onClose, onQrDetected, cartItems }) => {
+const ScanQrModal = ({ isOpen, onClose, onQrDetected }) => {
   const qrScannerRef = useRef(null);
   const { store, actions } = useContext(Context);
   const [isProcessing, setIsProcessing] = useState(false); // Estado de procesamiento
@@ -42,45 +42,48 @@ const ScanQrModal = ({ isOpen, onClose, onQrDetected, cartItems }) => {
   };
 
   const handleQrDetected = async (qrContent) => {
-    if (store.qrScanStatus === "processing") return; // Evitar múltiples ejecuciones
+    if (isProcessing || store.qrScanStatus === "processing") return; // Evitar múltiples ejecuciones
+    setIsProcessing(true); // Bloquear interacción mientras se procesa
 
     try {
-        const qrData = await actions.scanQR(qrContent);
+      const qrData = await actions.scanQR(qrContent);
 
-        if (!qrData || !qrData.id || !qrData.cafe_id) {
-            Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
-            return;
-        }
+      if (!qrData || !qrData.id || !qrData.cafe_id) {
+        Swal.fire("Error", "No se pudo leer el QR o la mesa no existe.", "error");
+        return;
+      }
 
-        // Crear la venta
-        const success = await actions.createSale(
-            cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
-            "", // Comments
-            cartItems,
-            qrData.id
-        );
+      // Validar que store.cart no esté vacío
+      if (!Array.isArray(store.cart) || store.cart.length === 0) {
+        Swal.fire("Error", "El carrito está vacío. Agrega productos antes de continuar.", "error");
+        return;
+      }
 
-        if (success) {
-            Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
-            navigate("/customer/purchase-history");
-        } else {
-            Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
-        }
+      // Calcular el total
+      const totalAmount = store.cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+      // Crear la venta
+      const success = await actions.createSale(
+        totalAmount,
+        "", // Comments
+        store.cart, // Usamos store.cart directamente
+        qrData.id
+      );
+
+      if (success) {
+        Swal.fire("Compra exitosa", "Tu pedido ha sido realizado y está en preparación.", "success");
+        navigate("/customer/purchase-history");
+      } else {
+        Swal.fire("Error", "Hubo un problema al realizar la compra. Inténtalo de nuevo.", "error");
+      }
     } catch (error) {
-        console.error("Error al procesar el QR:", error);
-
-        // Mostrar el mensaje de error que viene del backend, si está disponible
-        const errorMessage =
-            error.response?.data?.error || // Mensaje de error en el cuerpo de la respuesta
-            error.message || // Mensaje de error general
-            "No se pudo procesar el QR.";
-
-        Swal.fire("Error", errorMessage, "error");
+      console.error("Error al procesar el QR:", error);
+      Swal.fire("Error", error.message || "No se pudo procesar el QR.", "error");
     } finally {
-        actions.resetQrScanStatus(); // Restablecer el estado
+      setIsProcessing(false); // Liberar bloqueo
+      actions.resetQrScanStatus(); // Restablecer el estado
     }
-};
-
+  };
 
   const handleQrError = (errorMessage) => {
     console.warn("QR Error:", errorMessage);

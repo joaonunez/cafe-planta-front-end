@@ -404,13 +404,18 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       // SALES - Ventas
       // ------------------------------------
-      createSale: async (totalAmount, comments, cartItems, diningAreaId) => {
-        const { token, cartId, qrScanStatus } = getStore();
+      createSale: async (totalAmount, comments, diningAreaId) => {
+        const { token, cart, cartId, qrScanStatus } = getStore(); // Usamos store.cart
         const { setQrScanStatus, resetQrScanStatus } = getActions();
     
         if (qrScanStatus === "processing") {
             console.warn("El QR Scan ya está en proceso, evitando múltiples solicitudes.");
             return null; // Evitar solicitudes repetitivas
+        }
+    
+        if (!Array.isArray(cart) || cart.length === 0) {
+            console.error("El carrito está vacío. No se puede crear la venta.");
+            throw new Error("El carrito está vacío. Agrega productos antes de continuar.");
         }
     
         try {
