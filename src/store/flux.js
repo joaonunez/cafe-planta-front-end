@@ -404,57 +404,38 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       // SALES - Ventas
       // ------------------------------------
-      createSale: async (totalAmount, comments, diningAreaId) => {
-        const { token, cart, cartId, qrScanStatus } = getStore(); // Usamos store.cart
-        const { setQrScanStatus, resetQrScanStatus } = getActions();
-    
-        if (qrScanStatus === "processing") {
-            console.warn("El QR Scan ya está en proceso, evitando múltiples solicitudes.");
-            return null; // Evitar solicitudes repetitivas
-        }
-    
-        if (!Array.isArray(cart) || cart.length === 0) {
-            console.error("El carrito está vacío. No se puede crear la venta.");
-            throw new Error("El carrito está vacío. Agrega productos antes de continuar.");
-        }
-    
+      createSale: async (totalAmount, comments, cartItems, diningAreaId) => {
+        const { token, cartId } = getStore();
         try {
-            setQrScanStatus("processing"); // Indicar que la venta está en proceso
-    
-            const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    total_amount: totalAmount,
-                    comments,
-                    cart_id: cartId,
-                    dining_area_id: diningAreaId,
-                    qr_status: qrScanStatus, // Estado del QR para validación
-                }),
-            });
-    
-            if (!response.ok) {
-                const error = await response.json();
-                setQrScanStatus("error"); // Indicar error en el proceso
-                throw new Error(error.error || "Error al crear la venta");
-            }
-    
-            // Limpia el carrito y estado local tras éxito
-            setStore({ cart: [], cartId: null });
-            setQrScanStatus("success");
-            return true;
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              total_amount: totalAmount,
+              comments,
+              cart_id: cartId,
+              dining_area_id: diningAreaId,
+            }),
+          });
+      
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Error al crear la venta");
+          }
+      
+          // Limpia el carrito local después de una venta exitosa
+          setStore({ cart: [], cartId: null });
+          return true;
         } catch (error) {
-            console.error("Error en createSale:", error);
-            setQrScanStatus("error");
-            throw new Error(error.message || "No se pudo crear la venta");
-        } finally {
-            resetQrScanStatus(); // Restablecer estado
+          console.error("Error en createSale:", error);
+          throw new Error(error.message || "No se pudo crear la venta");
         }
-    },
+      },
+      
     
     
     
@@ -1207,17 +1188,8 @@ resetQrScanStatus: () => {
   setStore({ qrScanStatus: null });
 },
 scanQR: async (qrContent) => {
-  const { token, qrScanStatus } = getStore();
-  const { setQrScanStatus, resetQrScanStatus } = getActions();
-
-  if (qrScanStatus === "processing") {
-    console.warn("QR Scan ya está en proceso, evitando múltiples solicitudes.");
-    return null; // Evitar solicitudes paralelas
-  }
-
+  const { token } = getStore();
   try {
-    setQrScanStatus("processing"); // Indicar que el escaneo está en proceso
-
     const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
       method: "POST",
       headers: {
@@ -1230,20 +1202,15 @@ scanQR: async (qrContent) => {
 
     if (!response.ok) {
       const error = await response.json();
-      setQrScanStatus("error"); // Indicar que hubo un error
       throw new Error(error.error || "Error al escanear el QR");
     }
 
     const data = await response.json();
     setStore({ qrRead: data });
-    setQrScanStatus("success"); // Escaneo exitoso
     return data;
   } catch (error) {
     console.error("Error en scanQR:", error.message);
-    setQrScanStatus("error"); // Indicar que hubo un error
     throw new Error(error.message || "No se pudo procesar el QR.");
-  } finally {
-    resetQrScanStatus(); // Restablecer estado una vez terminado
   }
 },
 
