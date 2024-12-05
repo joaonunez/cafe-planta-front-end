@@ -434,7 +434,7 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error en createSale:", error);
           throw new Error(error.message || "No se pudo crear la venta");
         }
-      },
+      },      
       
     
     
