@@ -8,7 +8,6 @@ const ViewAllSales = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Solo se llama una vez para obtener todas las ventas
         if (!store.allSalesRequestByAdmin.length) {
             actions.fetchAllSalesRequestByAdmin();
         }
@@ -19,7 +18,6 @@ const ViewAllSales = () => {
             actions.deleteSaleByAdmin(saleId);
         }
     };
-    
 
     const handleViewDetails = (saleId) => {
         navigate(`/admin/view-admin-all-sales/view-details/${saleId}`);
