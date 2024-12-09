@@ -584,15 +584,24 @@ const getState = ({ getActions, getStore, setStore }) => {
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
           });
-
+      
           if (!response.ok) throw new Error("Error al obtener pedidos en progreso");
-
+      
           const data = await response.json();
-          setStore({ ordersInProgress: data });
+          // Asegurarse de que todos los datos requeridos están presentes
+          const formattedOrders = data.map(order => ({
+            ...order,
+            customer_name: order.customer_name || "Sin asignar",
+            dining_area_number: order.dining_area_number || "Sin asignar",
+            cafe_name: order.cafe_name || "Sin asignar"
+          }));
+      
+          setStore({ ordersInProgress: formattedOrders });
         } catch (error) {
           console.error("Error al obtener pedidos en progreso:", error);
         }
-      },
+      }
+      ,
       // Acción para que el vendedor tome una orden
       takeOrder: async (orderId) => {
         const { token } = getStore();
