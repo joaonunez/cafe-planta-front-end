@@ -7,10 +7,10 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
   const [editedSale, setEditedSale] = useState({ ...sale });
 
   useEffect(() => {
-    if (isEditing && !store.saleEditData) {
+    if (isEditing) {
       actions.fetchSaleEditDetails(sale.id);
     }
-  }, [isEditing, sale.id, store.saleEditData, actions]);
+  }, [isEditing, sale.id]);
 
   const handleEditClick = () => setIsEditing(true);
   
@@ -22,7 +22,7 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
   const handleSaveClick = () => {
     const updatedData = {
       ...editedSale,
-      status: editedSale.waiter_rut ? "Orden Tomada" : "En preparación" // Cambia el estado si se asigna un mesero
+      status: editedSale.waiter_rut ? "Orden Tomada" : "En preparación"
     };
     onSaveChanges(updatedData);
     setIsEditing(false);
@@ -36,6 +36,10 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
     }));
   };
 
+  // Condiciones para deshabilitar los campos de selección
+  const isDiningAreaDisabled = !editedSale.cafe_id;
+  const isWaiterDisabled = !editedSale.cafe_id;
+
   return (
     <div className="sale-card">
       <div className="sale-card-header">
@@ -45,6 +49,10 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
       <div className="sale-card-body">
         <div className="sale-detail">
           <p><strong>Fecha:</strong> {new Date(sale.date).toLocaleString()}</p>
+          
+          {/* Mostrar el nombre del cliente (Inmodificable) */}
+          <p><strong>Cliente:</strong> {sale.customer_name || "Aún sin asignar"}</p>
+          
           {isEditing ? (
             <div>
               <label><strong>Monto Total:</strong></label>
@@ -84,13 +92,18 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
                 value={editedSale.waiter_rut || ""}
                 onChange={handleChange}
                 className="form-control"
+                disabled={isWaiterDisabled}
               >
                 <option value="">Seleccione un Mesero</option>
-                {store.saleEditData?.waiters && store.saleEditData.waiters.map((waiter) => (
-                  <option key={waiter.rut} value={waiter.rut}>
-                    {waiter.first_name} {waiter.last_name_father}
-                  </option>
-                ))}
+                {store.saleEditData?.waiters && 
+                  store.saleEditData.waiters
+                    .filter(waiter => waiter.cafe_id === parseInt(editedSale.cafe_id))
+                    .map((waiter) => (
+                      <option key={waiter.rut} value={waiter.rut}>
+                        {waiter.first_name} {waiter.last_name_father}
+                      </option>
+                    ))
+                }
               </select>
 
               <label><strong>Mesa:</strong></label>
@@ -99,23 +112,25 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
                 value={editedSale.dining_area_id || ""}
                 onChange={handleChange}
                 className="form-control"
+                disabled={isDiningAreaDisabled}
               >
                 <option value="">Seleccione una Mesa</option>
-                {store.saleEditData?.dining_areas && store.saleEditData.dining_areas.map((area) => (
-                  <option key={area.id} value={area.id}>{area.name}</option>
-                ))}
+                {store.saleEditData?.dining_areas && 
+                  store.saleEditData.dining_areas
+                    .filter(area => area.cafe_id === parseInt(editedSale.cafe_id))
+                    .map((area) => (
+                      <option key={area.id} value={area.id}>{area.number}</option>
+                    ))
+                }
               </select>
             </div>
           ) : (
             <div>
               <p><strong>Monto Total:</strong> ${sale.total_amount.toLocaleString("es-CL")}</p>
               <p><strong>Comentarios:</strong> {sale.comments || "Sin comentarios"}</p>
-              <p><strong>Cliente:</strong> {sale.customer_name || "Aún sin asignar"}</p>
-              <p><strong>Cliente RUT:</strong> {sale.customer_rut || "Aún sin asignar"}</p>
               <p><strong>Cafetería:</strong> {sale.cafe_name || "Aún sin asignar"}</p>
               <p><strong>Mesero:</strong> {sale.waiter_name || "Aún sin asignar"}</p>
-              <p><strong>Mesero RUT:</strong> {sale.waiter_rut || "Aún sin asignar"}</p>
-              <p><strong>Mesa:</strong> {sale.dining_area_name || "Aún sin asignar"}</p>
+              <p><strong>Mesa:</strong> {sale.dining_area_id ? `${sale.dining_area_number}` : "Aún sin asignar"}</p>
             </div>
           )}
         </div>
