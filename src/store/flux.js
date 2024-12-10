@@ -22,15 +22,52 @@ const getState = ({ getActions, getStore, setStore }) => {
       lastInventoryPage: "/admin/inventory-management?page=1",
       adminCombos: [],
       diningAreas: [],
-      qrRead:null,
+      qrRead: null,
       qrScanStatus: null,
 
-      
+
     },
     actions: {
       setLastInventoryPage: (pageUrl) => {
         setStore({ lastInventoryPage: pageUrl });
       },
+      // Ejemplo de implementación:
+      editUser: async (rut, data) => {
+        const token = localStorage.getItem("token");
+        try {
+          const response = await fetch(`http://localhost:3001/user/edit/${rut}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, 
+            },
+            body: JSON.stringify(data),
+            credentials: "include", 
+          });
+      
+          if (response.ok) {
+            const result = await response.json();
+            const updatedUser = result.user;
+      
+            // Actualizar la lista de usuarios en el store
+            const updatedUsers = getStore().queriedUsers.map((u) =>
+              u.rut === rut ? updatedUser : u
+            );
+            setStore({ queriedUsers: updatedUsers });
+            return { success: true, message: "Usuario actualizado exitosamente" };
+          } else {
+            const errorData = await response.json();
+            console.error("Error al editar usuario:", errorData);
+            return { success: false, message: errorData.error || "Error desconocido" };
+          }
+        } catch (error) {
+          console.error("Error en editUser:", error);
+          return { success: false, message: "Error de conexión al servidor" };
+        }
+      }
+      ,
+      
+
 
       // Obtiene la última página visitada
       getLastInventoryPage: () => {
@@ -42,7 +79,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       loginCustomer: async (username, password) => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/customer/login-customer", {
+          const response = await fetch("http://localhost:3001/customer/login-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -68,9 +105,10 @@ const getState = ({ getActions, getStore, setStore }) => {
         }
       },
 
+
       logoutCustomer: async () => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/customer/logout-customer", {
+          const response = await fetch("http://localhost:3001/customer/logout-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -95,7 +133,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       loginAdmin: async (username, password) => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/admin-login", {
+          const response = await fetch("http://localhost:3001/user/admin-login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -123,7 +161,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       logoutAdmin: async () => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/logout-admin", {
+          const response = await fetch("http://localhost:3001/user/logout-admin", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -147,7 +185,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       employeeLogin: async (username, password) => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/employee-login", {
+          const response = await fetch("http://localhost:3001/user/employee-login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -155,9 +193,9 @@ const getState = ({ getActions, getStore, setStore }) => {
             body: JSON.stringify({ username, password }),
             credentials: "include",
           });
-      
+
           if (!response.ok) throw new Error("Failed to login");
-      
+
           const data = await response.json();
           setStore({ token: data.token, employee: data.user });
           localStorage.setItem("token", data.token); // Almacena el token
@@ -168,28 +206,28 @@ const getState = ({ getActions, getStore, setStore }) => {
           return false;
         }
       },
-      
-    
-    logoutEmployee: async () => {
-      try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/logout-employee", {
-              method: "POST",
-              credentials: "include",
+
+
+      logoutEmployee: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/user/logout-employee", {
+            method: "POST",
+            credentials: "include",
           });
-  
+
           if (!response.ok) throw new Error("Failed to logout");
-  
+
           setStore({ token: null, employee: null });
           return true;
-      } catch (error) {
+        } catch (error) {
           console.error("Error during employee logout:", error);
           return false;
-      }
-  },
+        }
+      },
 
       registerCustomer: async (customerData) => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/customer/register-customer", {
+          const response = await fetch("http://localhost:3001/customer/register-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -215,9 +253,9 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       addToCart: async (item_id, item_type_id, quantity = 1) => {
         const { token } = getStore();
-      
+
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/add_item", {
+          const response = await fetch("http://localhost:3001/cart/add_item", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -226,21 +264,21 @@ const getState = ({ getActions, getStore, setStore }) => {
             credentials: "include",
             body: JSON.stringify({ item_id, item_type_id, quantity }),
           });
-      
+
           if (!response.ok) throw new Error("Failed to add item to cart");
-      
+
           // Volver a cargar los ítems del carrito después de agregar
           await getActions().getCartItems();
         } catch (error) {
           console.error("Error adding item to cart:", error);
         }
       },
-      
+
 
       getCartItems: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/get_items", {
+          const response = await fetch("http://localhost:3001/cart/get_items", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -258,7 +296,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       removeFromCart: async (itemId) => {
         const { token, cart } = getStore();
         try {
-          const response = await fetch(`https://back-end-cafe-planta.vercel.app/cart/delete_item/${itemId}`, {
+          const response = await fetch(`http://localhost:3001/cart/delete_item/${itemId}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -275,7 +313,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       updateCartItemQuantity: async (itemId, newQuantity) => {
         const { token, cart } = getStore();
         try {
-          const response = await fetch(`https://back-end-cafe-planta.vercel.app/cart/update_item/${itemId}`, {
+          const response = await fetch(`http://localhost:3001/cart/update_item/${itemId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -299,7 +337,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       clearCartItems: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/clear_items", {
+          const response = await fetch("http://localhost:3001/cart/clear_items", {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -316,7 +354,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       deleteCart: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/delete", {
+          const response = await fetch("http://localhost:3001/cart/delete", {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -336,7 +374,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       getFavorites: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/favorite/list-favorites-customer", {
+          const response = await fetch("http://localhost:3001/favorite/list-favorites-customer", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -356,7 +394,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       addFavorite: async (itemId, itemTypeId) => {
         const { token } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/favorite/add-to-favorites-customer", {
+          const response = await fetch("http://localhost:3001/favorite/add-to-favorites-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -380,7 +418,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       removeFavorite: async (itemId, itemTypeId) => {
         const { token } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/favorite/remove-favorite-customer", {
+          const response = await fetch("http://localhost:3001/favorite/remove-favorite-customer", {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -407,7 +445,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       createSale: async (totalAmount, comments, cartItems, diningAreaId) => {
         const { token, cartId } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
+          const response = await fetch("http://localhost:3001/sale/create", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -421,12 +459,12 @@ const getState = ({ getActions, getStore, setStore }) => {
               dining_area_id: diningAreaId,
             }),
           });
-      
+
           if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || "Error al crear la venta");
           }
-      
+
           // Limpia el carrito local después de una venta exitosa
           setStore({ cart: [], cartId: null });
           return true;
@@ -434,19 +472,19 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error en createSale:", error);
           throw new Error(error.message || "No se pudo crear la venta");
         }
-      },      
-      
-    
-    
-    
-      
-    
-    
+      },
+
+
+
+
+
+
+
 
       getLatestOrder: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/latest", {
+          const response = await fetch("http://localhost:3001/sale/latest", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -464,7 +502,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       getOrderDetails: async (saleId) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/order_details/${saleId}`, {
+          const response = await fetch(`http://localhost:3001/sale/order_details/${saleId}`, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -484,7 +522,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       requestCustomerProducts: async () => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/product/customer-request-products");
+          const response = await fetch("http://localhost:3001/product/customer-request-products");
           const data = await response.json();
 
           if (response.ok) {
@@ -499,7 +537,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       requestCustomerCombos: async () => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/combo_menu/customer-request-combos");
+          const response = await fetch("http://localhost:3001/combo_menu/customer-request-combos");
           const data = await response.json();
 
           if (response.ok) {
@@ -514,7 +552,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       fetchAdminProducts: async () => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/product/admin-get-products", {
+          const response = await fetch("http://localhost:3001/product/admin-get-products", {
             method: "GET",
             headers: { "Content-Type": "application/json" },
           });
@@ -532,7 +570,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       fetchProductCategories: async () => {
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/product_category");
+          const response = await fetch("http://localhost:3001/product_category");
           const data = await response.json();
 
           if (response.ok) {
@@ -551,7 +589,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchUsersOnSystem: async () => {
         const { token } = getStore(); // Asegurarse de obtener el token actual
         try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/get_users_on_system", {
+          const response = await fetch("http://localhost:3001/user/get_users_on_system", {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -559,9 +597,9 @@ const getState = ({ getActions, getStore, setStore }) => {
             },
             credentials: "include", // Asegurarse de incluir las credenciales
           });
-      
+
           const data = await response.json();
-      
+
           if (response.ok) {
             setStore({ queriedUsers: data });
           } else {
@@ -571,32 +609,41 @@ const getState = ({ getActions, getStore, setStore }) => {
           console.error("Error en fetchUsersOnSystem:", err);
         }
       },
-      
+
       // ------------------------------------
       // ORDERS MANAGEMENT - Gestión de ORDERS
       // ------------------------------------
       fetchOrdersInProgress: async () => {
         const { token } = getStore();
         try {
-            const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/in_progress", {
-                method: "GET",
-                headers: { Authorization: `Bearer ${token}` },
-                credentials: "include",
-            });
-            
-            if (!response.ok) throw new Error("Error al obtener pedidos en progreso");
-            
-            const data = await response.json();
-            setStore({ ordersInProgress: data });
+          const response = await fetch("http://localhost:3001/sale/in_progress", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+      
+          if (!response.ok) throw new Error("Error al obtener pedidos en progreso");
+      
+          const data = await response.json();
+          // Asegurarse de que todos los datos requeridos están presentes
+          const formattedOrders = data.map(order => ({
+            ...order,
+            customer_name: order.customer_name || "Sin asignar",
+            dining_area_number: order.dining_area_number || "Sin asignar",
+            cafe_name: order.cafe_name || "Sin asignar"
+          }));
+      
+          setStore({ ordersInProgress: formattedOrders });
         } catch (error) {
-            console.error("Error al obtener pedidos en progreso:", error);
+          console.error("Error al obtener pedidos en progreso:", error);
         }
-    },
+      }
+      ,
       // Acción para que el vendedor tome una orden
       takeOrder: async (orderId) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/take_order/${orderId}`, {
+          const response = await fetch(`http://localhost:3001/sale/take_order/${orderId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -623,190 +670,191 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchTakenOrders: async () => {
         const { token, employee } = getStore();
         try {
-            const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/taken_orders/${employee.rut}`, {
-                method: "GET",
-                headers: { Authorization: `Bearer ${token}` },
-                credentials: "include",
-            });
-    
-            if (!response.ok) throw new Error("Error al obtener pedidos tomados");
-    
-            const data = await response.json();
-            setStore({ takenOrders: data });
+          const response = await fetch(`http://localhost:3001/sale/taken_orders/${employee.rut}`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Error al obtener pedidos tomados");
+
+          const data = await response.json();
+          setStore({ takenOrders: data });
         } catch (error) {
-            console.error("Error al obtener pedidos tomados:", error);
+          console.error("Error al obtener pedidos tomados:", error);
         }
-    },
+      },
+
       fetchAllSalesRequestByAdmin: async () => {
         try {
-            const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/request_all_sales_by_admin`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${getStore().token}`
-                },
-                credentials: "include" // Incluye las credenciales en la solicitud
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setStore({ allSalesRequestByAdmin: data });
-            } else {
-                console.error("Error al obtener todas las ventas:", response.status);
-            }
-        } catch (error) {
-            console.error("Error en la solicitud de todas las ventas:", error);
-        }
-    },
-    
-    deleteSaleByAdmin: async (saleId) => {
-      try {
-          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/delete_sale_by_admin/${saleId}`, {
-              method: "DELETE",
-              headers: {
-                  Authorization: `Bearer ${getStore().token}`,
-              },
-              credentials: "include",
+          const response = await fetch(`http://localhost:3001/sale/request_all_sales_by_admin`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${getStore().token}`
+            },
+            credentials: "include" // Incluye las credenciales en la solicitud
           });
-  
           if (response.ok) {
-              console.log(`Venta con ID ${saleId} eliminada exitosamente.`);
-              const updatedSales = getStore().allSalesRequestByAdmin.filter((sale) => sale.id !== saleId);
-              setStore({ allSalesRequestByAdmin: updatedSales });
+            const data = await response.json();
+            setStore({ allSalesRequestByAdmin: data });
           } else {
-              const error = await response.json();
-              console.error("Error al eliminar la venta:", error);
+            console.error("Error al obtener todas las ventas:", response.status);
           }
-      } catch (error) {
+        } catch (error) {
+          console.error("Error en la solicitud de todas las ventas:", error);
+        }
+      },
+
+      deleteSaleByAdmin: async (saleId) => {
+        try {
+          const response = await fetch(`http://localhost:3001/sale/delete_sale_by_admin/${saleId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${getStore().token}`,
+            },
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            console.log(`Venta con ID ${saleId} eliminada exitosamente.`);
+            const updatedSales = getStore().allSalesRequestByAdmin.filter((sale) => sale.id !== saleId);
+            setStore({ allSalesRequestByAdmin: updatedSales });
+          } else {
+            const error = await response.json();
+            console.error("Error al eliminar la venta:", error);
+          }
+        } catch (error) {
           console.error("Error en la solicitud para eliminar la venta:", error);
-      }
-  },
-  
-  fetchCafes: async () => {
-    try {
-      const response = await fetch("https://back-end-cafe-planta.vercel.app/cafe/");
-      if (response.ok) {
-        const data = await response.json();
-        setStore({ cafes: data });
-      } else {
-        console.error("Error al obtener las sedes de café:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error en fetchCafes:", error);
-    }
-  },
-    fetchSaleDetails: async (saleId) => {
-      try {
-          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale_detail/${saleId}`);
+        }
+      },
+
+      fetchCafes: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/cafe/");
           if (response.ok) {
-              const details = await response.json();
-              return details.map(item => ({
-                  ...item,
-                  name: item.item_type_id === 1 ? item.product.name : item.combo.name,
-                  image_url: item.item_type_id === 1 ? item.product.image_url : item.combo.image_url,
-              }));
+            const data = await response.json();
+            setStore({ cafes: data });
           } else {
-              console.error("Error fetching sale details");
-              return [];
+            console.error("Error al obtener las sedes de café:", response.statusText);
           }
-      } catch (error) {
+        } catch (error) {
+          console.error("Error en fetchCafes:", error);
+        }
+      },
+      fetchSaleDetails: async (saleId) => {
+        try {
+          const response = await fetch(`http://localhost:3001/sale_detail/${saleId}`);
+          if (response.ok) {
+            const details = await response.json();
+            return details.map(item => ({
+              ...item,
+              name: item.item_type_id === 1 ? item.product.name : item.combo.name,
+              image_url: item.item_type_id === 1 ? item.product.image_url : item.combo.image_url,
+            }));
+          } else {
+            console.error("Error fetching sale details");
+            return [];
+          }
+        } catch (error) {
           console.error("Error in fetchSaleDetails:", error);
           return [];
-      }
-  },
-  fetchSaleEditDetails: async (saleId) => {
-    const { token } = getStore();
-    try {
-      const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/${saleId}/edit-details`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        credentials: "include"
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        setStore({ saleEditData: data });
-      } else {
-        console.error("Error al obtener datos para la edición de la venta");
-      }
-    } catch (error) {
-      console.error("Error en fetchSaleEditDetails:", error);
-    }
-  },
-  
-  
-updateSaleDetails: async (saleId, updatedData) => {
-    const { token } = getStore();
-    try {
-      const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/${saleId}/edit-details`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        credentials: "include",
-        body: JSON.stringify(updatedData)
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        const updatedSales = getStore().allSalesRequestByAdmin.map(sale =>
-          sale.id === saleId ? data : sale
-        );
-        setStore({ allSalesRequestByAdmin: updatedSales });
-      } else {
-        console.error("Error al actualizar la venta");
-      }
-    } catch (error) {
-      console.error("Error en updateSaleDetails:", error);
-    }
-  },
-  markOrderAsDelivered: async (orderId) => {
-    const { token } = getStore();
-    try {
-      const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/mark_as_delivered/${orderId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        credentials: "include"
-      });
-  
-      if (!response.ok) throw new Error("Error al marcar la orden como entregada");
-  
-      getActions().fetchTakenOrders(); // Actualiza los pedidos tomados
-      getActions().fetchCompletedOrders(); // Actualiza las ventas realizadas
-    } catch (error) {
-      console.error("Error al marcar la orden como entregada:", error);
-    }
-  },
-  
-  // Acción para obtener ventas realizadas (entregadas)
-  fetchCompletedOrders: async () => {
-    const { token, employee } = getStore();
-    try {
-      const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/completed_orders/${employee.rut}`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include"
-      });
-  
-      if (!response.ok) throw new Error("Error al obtener ventas realizadas");
-  
-      const data = await response.json();
-      setStore({ completedOrders: data });
-    } catch (error) {
-      console.error("Error al obtener ventas realizadas:", error);
-    }
-  },
-   // ------------------------------------
+        }
+      },
+      fetchSaleEditDetails: async (saleId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/${saleId}/edit-details`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            credentials: "include"
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setStore({ saleEditData: data });
+          } else {
+            console.error("Error al obtener datos para la edición de la venta");
+          }
+        } catch (error) {
+          console.error("Error en fetchSaleEditDetails:", error);
+        }
+      },
+
+
+      updateSaleDetails: async (saleId, updatedData) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/${saleId}/edit-details`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            credentials: "include",
+            body: JSON.stringify(updatedData)
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const updatedSales = getStore().allSalesRequestByAdmin.map(sale =>
+              sale.id === saleId ? data : sale
+            );
+            setStore({ allSalesRequestByAdmin: updatedSales });
+          } else {
+            console.error("Error al actualizar la venta");
+          }
+        } catch (error) {
+          console.error("Error en updateSaleDetails:", error);
+        }
+      },
+      markOrderAsDelivered: async (orderId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/mark_as_delivered/${orderId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            credentials: "include"
+          });
+
+          if (!response.ok) throw new Error("Error al marcar la orden como entregada");
+
+          getActions().fetchTakenOrders(); // Actualiza los pedidos tomados
+          getActions().fetchCompletedOrders(); // Actualiza las ventas realizadas
+        } catch (error) {
+          console.error("Error al marcar la orden como entregada:", error);
+        }
+      },
+
+      // Acción para obtener ventas realizadas (entregadas)
+      fetchCompletedOrders: async () => {
+        const { token, employee } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/completed_orders/${employee.rut}`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include"
+          });
+
+          if (!response.ok) throw new Error("Error al obtener ventas realizadas");
+
+          const data = await response.json();
+          setStore({ completedOrders: data });
+        } catch (error) {
+          console.error("Error al obtener ventas realizadas:", error);
+        }
+      },
+      // ------------------------------------
       // ADD PRODUCT - Crear Producto
       // ------------------------------------
       addProduct: async (formData) => {
         try {
           // Hacer la solicitud POST al backend
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/product/create", {
+          const response = await fetch("http://localhost:3001/product/create", {
             method: "POST",
             body: formData, // Enviar el FormData directamente
           });
@@ -832,395 +880,395 @@ updateSaleDetails: async (saleId, updatedData) => {
       },
       updateProduct: async (productId, updatedData) => {
         const { token } = getStore();
-    
+
         try {
-            const response = await fetch(`https://back-end-cafe-planta.vercel.app/product/update/${productId}`, {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${token}`, // Token incluido para autenticación
-                },
-                body: updatedData, // Enviar el FormData directamente
-                credentials: "include", // Incluir credenciales
-            });
-    
-            if (!response.ok) {
-                const error = await response.json();
-                console.error("Error al actualizar producto:", error);
-                return false;
-            }
-    
-            const data = await response.json();
-    
-            // Actualizar el estado del store para reflejar los cambios
-            const updatedProducts = getStore().adminProducts.map((product) =>
-                product.id === productId ? data.product : product
-            );
-    
-            setStore({ adminProducts: updatedProducts });
-            console.log("Producto actualizado exitosamente:", data);
-            return true;
-        } catch (error) {
-            console.error("Error en updateProduct:", error);
+          const response = await fetch(`http://localhost:3001/product/update/${productId}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`, // Token incluido para autenticación
+            },
+            body: updatedData, // Enviar el FormData directamente
+            credentials: "include", // Incluir credenciales
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            console.error("Error al actualizar producto:", error);
             return false;
-        }
-    },
-    deleteProduct: async (productId, adminPassword) => {
-      const { admin, token } = getStore();
-    
-      try {
-        const response = await fetch(`https://back-end-cafe-planta.vercel.app/product/delete/${productId}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: "include", // Aseguramos incluir las credenciales
-          body: JSON.stringify({
-            admin_rut: admin.rut,
-            password: adminPassword,
-          }),
-        });
-    
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Error al eliminar el producto:", errorData);
+          }
+
+          const data = await response.json();
+
+          // Actualizar el estado del store para reflejar los cambios
+          const updatedProducts = getStore().adminProducts.map((product) =>
+            product.id === productId ? data.product : product
+          );
+
+          setStore({ adminProducts: updatedProducts });
+          console.log("Producto actualizado exitosamente:", data);
+          return true;
+        } catch (error) {
+          console.error("Error en updateProduct:", error);
           return false;
         }
-    
-        // Actualizar la lista de productos después de eliminar
-        await getActions().fetchAdminProducts();
-        return true;
-      } catch (error) {
-        console.error("Error en deleteProduct:", error);
-        return false;
-      }
-    },
-    fetchCloudinaryStats: async () => {
-      try {
-          const response = await fetch("https://back-end-cafe-planta.vercel.app/cloudinary/stats", {
-              method: "GET",
-              headers: {
-                  "Content-Type": "application/json",
-              },
+      },
+      deleteProduct: async (productId, adminPassword) => {
+        const { admin, token } = getStore();
+
+        try {
+          const response = await fetch(`http://localhost:3001/product/delete/${productId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include", // Aseguramos incluir las credenciales
+            body: JSON.stringify({
+              admin_rut: admin.rut,
+              password: adminPassword,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error al eliminar el producto:", errorData);
+            return false;
+          }
+
+          // Actualizar la lista de productos después de eliminar
+          await getActions().fetchAdminProducts();
+          return true;
+        } catch (error) {
+          console.error("Error en deleteProduct:", error);
+          return false;
+        }
+      },
+      fetchCloudinaryStats: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/cloudinary/stats", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           });
           if (!response.ok) {
-              throw new Error("No se pudieron obtener las estadísticas de Cloudinary.");
+            throw new Error("No se pudieron obtener las estadísticas de Cloudinary.");
           }
           const data = await response.json();
           setStore({ cloudinaryStats: data });
-      } catch (error) {
+        } catch (error) {
           console.error("Error obteniendo estadísticas de Cloudinary:", error);
-      }
-  },
-  fetchProductById: async (productId) => {
-    try {
-        const response = await fetch(`https://back-end-cafe-planta.vercel.app/product/${productId}`, {
+        }
+      },
+      fetchProductById: async (productId) => {
+        try {
+          const response = await fetch(`http://localhost:3001/product/${productId}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
+              "Content-Type": "application/json",
             },
-        });
+          });
 
-        if (!response.ok) {
+          if (!response.ok) {
             const error = await response.json();
             console.error("Error al obtener el producto:", error);
             return null;
+          }
+
+          const product = await response.json();
+          return product;
+        } catch (error) {
+          console.error("Error en fetchProductById:", error);
+          return null;
         }
-
-        const product = await response.json();
-        return product;
-    } catch (error) {
-        console.error("Error en fetchProductById:", error);
-        return null;
-    }
-},
-fetchAdminCombos: async () => {
-  try {
-      const response = await fetch("https://back-end-cafe-planta.vercel.app/combo_menu/admin-get-combos", {
-          method: "GET",
-          headers: {
+      },
+      fetchAdminCombos: async () => {
+        try {
+          const response = await fetch("http://localhost:3001/combo_menu/admin-get-combos", {
+            method: "GET",
+            headers: {
               "Content-Type": "application/json",
-          },
-      });
+            },
+          });
 
-      if (!response.ok) {
-          const error = await response.json();
-          console.error("Error al obtener los combos:", error);
-          return;
-      }
+          if (!response.ok) {
+            const error = await response.json();
+            console.error("Error al obtener los combos:", error);
+            return;
+          }
 
-      const combos = await response.json();
-      setStore({ adminCombos: combos });
-  } catch (error) {
-      console.error("Error en fetchAdminCombos:", error);
-  }
-},
-fetchComboById: async (comboId) => {
-  try {
-    const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/get-combo/${comboId}`);
-    if (!response.ok) throw new Error("Error al obtener el combo");
-    return await response.json();
-  } catch (error) {
-    console.error("Error en fetchComboById:", error);
-  }
-},
+          const combos = await response.json();
+          setStore({ adminCombos: combos });
+        } catch (error) {
+          console.error("Error en fetchAdminCombos:", error);
+        }
+      },
+      fetchComboById: async (comboId) => {
+        try {
+          const response = await fetch(`http://localhost:3001/combo_menu/get-combo/${comboId}`);
+          if (!response.ok) throw new Error("Error al obtener el combo");
+          return await response.json();
+        } catch (error) {
+          console.error("Error en fetchComboById:", error);
+        }
+      },
 
-searchProducts: async (term) => {
-  try {
-    const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/search-products?term=${term}`);
-    if (!response.ok) throw new Error("Error al buscar productos");
-    return await response.json();
-  } catch (error) {
-    console.error("Error en searchProducts:", error);
-  }
-},
-updateCombo: async (comboId, comboData) => {
-  const { token } = getStore();
+      searchProducts: async (term) => {
+        try {
+          const response = await fetch(`http://localhost:3001/combo_menu/search-products?term=${term}`);
+          if (!response.ok) throw new Error("Error al buscar productos");
+          return await response.json();
+        } catch (error) {
+          console.error("Error en searchProducts:", error);
+        }
+      },
+      updateCombo: async (comboId, comboData) => {
+        const { token } = getStore();
 
-  try {
-      const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/update-combo/${comboId}`, {
-          method: "PUT",
-          headers: {
+        try {
+          const response = await fetch(`http://localhost:3001/combo_menu/update-combo/${comboId}`, {
+            method: "PUT",
+            headers: {
               Authorization: `Bearer ${token}`, // Token incluido para autenticación
-          },
-          body: comboData, // Enviar el FormData directamente
-          credentials: "include", // Incluir credenciales
-      });
+            },
+            body: comboData, // Enviar el FormData directamente
+            credentials: "include", // Incluir credenciales
+          });
 
-      if (!response.ok) {
-          const error = await response.json();
-          console.error("Error al actualizar combo:", error);
+          if (!response.ok) {
+            const error = await response.json();
+            console.error("Error al actualizar combo:", error);
+            return false;
+          }
+
+          const data = await response.json();
+
+          // Actualizar el estado del store para reflejar los cambios
+          const updatedCombos = getStore().adminCombos.map((combo) =>
+            combo.id === comboId ? data.combo : combo
+          );
+
+          setStore({ adminCombos: updatedCombos });
+          console.log("Combo actualizado exitosamente:", data);
+          return true;
+        } catch (error) {
+          console.error("Error en updateCombo:", error);
           return false;
-      }
-
-      const data = await response.json();
-
-      // Actualizar el estado del store para reflejar los cambios
-      const updatedCombos = getStore().adminCombos.map((combo) =>
-          combo.id === comboId ? data.combo : combo
-      );
-
-      setStore({ adminCombos: updatedCombos });
-      console.log("Combo actualizado exitosamente:", data);
-      return true;
-  } catch (error) {
-      console.error("Error en updateCombo:", error);
-      return false;
-  }
-},
-
-
-createCombo: async (comboData) => {
-  const { token } = getStore();
-
-  try {
-    const response = await fetch("https://back-end-cafe-planta.vercel.app/combo_menu/create", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`, // Si usas autenticación
+        }
       },
-      body: comboData, // Enviar el FormData directamente
-      credentials: "include", // Incluir credenciales para cookies si es necesario
-    });
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error("Error al crear el combo:", error);
-      return false;
-    }
 
-    const data = await response.json();
-    console.log("Combo creado exitosamente:", data);
-    return true;
-  } catch (error) {
-    console.error("Error en createCombo:", error);
-    return false;
-  }
-},
-deleteCombo: async (comboId, adminPassword) => {
-  const { admin, token } = getStore();
+      createCombo: async (comboData) => {
+        const { token } = getStore();
 
-  try {
-    const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/delete/${comboId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        try {
+          const response = await fetch("http://localhost:3001/combo_menu/create", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`, // Si usas autenticación
+            },
+            body: comboData, // Enviar el FormData directamente
+            credentials: "include", // Incluir credenciales para cookies si es necesario
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            console.error("Error al crear el combo:", error);
+            return false;
+          }
+
+          const data = await response.json();
+          console.log("Combo creado exitosamente:", data);
+          return true;
+        } catch (error) {
+          console.error("Error en createCombo:", error);
+          return false;
+        }
       },
-      credentials: "include",
-      body: JSON.stringify({
-        admin_rut: admin.rut,
-        password: adminPassword,
-      }),
-    });
+      deleteCombo: async (comboId, adminPassword) => {
+        const { admin, token } = getStore();
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Error al eliminar el combo:", errorData);
-      return false;
-    }
-
-    // Actualizar la lista de combos después de eliminar
-    await getActions().fetchAdminCombos();
-    return true;
-  } catch (error) {
-    console.error("Error en deleteCombo:", error);
-    return false;
-  }
-},
-fetchPurchaseHistory: async () => {
-  const { token } = getStore();
-  try {
-    const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/purchase_history", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error("Error al obtener el historial de compras:", error);
-      return [];
-    }
-
-    const data = await response.json();
-    return data.map((sale) => ({
-      ...sale,
-      items: sale.items || [], // Asegúrate de que siempre haya un array
-    }));
-  } catch (error) {
-    console.error("Error en fetchPurchaseHistory:", error);
-    return [];
-  }
-},
-fetchOrderDetails: async (orderId) => {
-  const { token } = getStore();
-  try {
-    const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/order_details/${orderId}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-      credentials: "include",
-    });
-
-    if (!response.ok) throw new Error("Error al obtener los detalles del pedido");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error en fetchOrderDetails:", error);
-    return null;
-  }
-},
-validateLatestOrder: async () => {
-  const { token } = getStore();
-  try {
-      const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/validate_latest_order", {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: "include",
-      });
-
-      if (!response.ok) {
-          const error = await response.json();
-          console.error("Error al validar el último pedido:", error.message || error);
-          return { canCreateOrder: false, message: error.message || "Error desconocido" };
-      }
-
-      const data = await response.json();
-      return data;
-  } catch (error) {
-      console.error("Error al validar el último pedido:", error);
-      return { canCreateOrder: false, message: "Error en la conexión con el servidor" };
-  }
-},
-fetchDiningAreas: async () => {
-  const { token } = getStore();
-  try {
-      const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/list", {
-          method: "GET",
-          headers: {
-              Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-      });
-
-      if (!response.ok) throw new Error("Error al obtener las mesas disponibles");
-
-      const data = await response.json();
-      setStore({ diningAreas: data });
-  } catch (error) {
-      console.error("Error en fetchDiningAreas:", error);
-      setStore({ diningAreas: [] }); // Asegurarse de que diningAreas no sea undefined
-  }
-},
-createDiningArea: async (number, cafeId) => {
-  const { token } = getStore();
-  try {
-      const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/create", {
-          method: "POST",
-          headers: {
+        try {
+          const response = await fetch(`http://localhost:3001/combo_menu/delete/${comboId}`, {
+            method: "DELETE",
+            headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({ number, cafe_id: cafeId }),
-      });
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              admin_rut: admin.rut,
+              password: adminPassword,
+            }),
+          });
 
-      if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || "Error al crear la mesa");
-      }
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error al eliminar el combo:", errorData);
+            return false;
+          }
 
-      const data = await response.json();
-      const { diningAreas } = getStore();
-      setStore({ diningAreas: [...diningAreas, data] });
-      return true;
-  } catch (error) {
-      console.error("Error en createDiningArea:", error);
-      return false;
-  }
-},
-setQrScanStatus: (status) => {
-  setStore({ qrScanStatus: status });
-},
-resetQrScanStatus: () => {
-  setStore({ qrScanStatus: null });
-},
-scanQR: async (qrContent) => {
-  const { token } = getStore();
-  try {
-    const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+          // Actualizar la lista de combos después de eliminar
+          await getActions().fetchAdminCombos();
+          return true;
+        } catch (error) {
+          console.error("Error en deleteCombo:", error);
+          return false;
+        }
       },
-      credentials: "include",
-      body: JSON.stringify({ qr_content: qrContent }),
-    });
+      fetchPurchaseHistory: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/sale/purchase_history", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Error al escanear el QR");
-    }
+          if (!response.ok) {
+            const error = await response.json();
+            console.error("Error al obtener el historial de compras:", error);
+            return [];
+          }
 
-    const data = await response.json();
-    setStore({ qrRead: data });
-    return data;
-  } catch (error) {
-    console.error("Error en scanQR:", error.message);
-    throw new Error(error.message || "No se pudo procesar el QR.");
-  }
-},
+          const data = await response.json();
+          return data.map((sale) => ({
+            ...sale,
+            items: sale.items || [], // Asegúrate de que siempre haya un array
+          }));
+        } catch (error) {
+          console.error("Error en fetchPurchaseHistory:", error);
+          return [];
+        }
+      },
+      fetchOrderDetails: async (orderId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/sale/order_details/${orderId}`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Error al obtener los detalles del pedido");
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error en fetchOrderDetails:", error);
+          return null;
+        }
+      },
+      validateLatestOrder: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/sale/validate_latest_order", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            console.error("Error al validar el último pedido:", error.message || error);
+            return { canCreateOrder: false, message: error.message || "Error desconocido" };
+          }
+
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error al validar el último pedido:", error);
+          return { canCreateOrder: false, message: "Error en la conexión con el servidor" };
+        }
+      },
+      fetchDiningAreas: async () => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/dining_area/list", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!response.ok) throw new Error("Error al obtener las mesas disponibles");
+
+          const data = await response.json();
+          setStore({ diningAreas: data });
+        } catch (error) {
+          console.error("Error en fetchDiningAreas:", error);
+          setStore({ diningAreas: [] }); // Asegurarse de que diningAreas no sea undefined
+        }
+      },
+      createDiningArea: async (number, cafeId) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/dining_area/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({ number, cafe_id: cafeId }),
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Error al crear la mesa");
+          }
+
+          const data = await response.json();
+          const { diningAreas } = getStore();
+          setStore({ diningAreas: [...diningAreas, data] });
+          return true;
+        } catch (error) {
+          console.error("Error en createDiningArea:", error);
+          return false;
+        }
+      },
+      setQrScanStatus: (status) => {
+        setStore({ qrScanStatus: status });
+      },
+      resetQrScanStatus: () => {
+        setStore({ qrScanStatus: null });
+      },
+      scanQR: async (qrContent) => {
+        const { token } = getStore();
+        try {
+          const response = await fetch("http://localhost:3001/dining_area/scan_qr", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({ qr_content: qrContent }),
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Error al escanear el QR");
+          }
+
+          const data = await response.json();
+          setStore({ qrRead: data });
+          return data;
+        } catch (error) {
+          console.error("Error en scanQR:", error.message);
+          throw new Error(error.message || "No se pudo procesar el QR.");
+        }
+      },
 
 
-  
-    
-    
-  
 
-      
+
+
+
+
+
     },
   };
 };
