@@ -1,79 +1,47 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Context } from '../../store/context';
-import UserDetailsCard from './cards/UserCard';
+import UserDetailsCard from './cards/UserDetailsCard';
 
 const UserManagement = () => {
   const { store, actions } = useContext(Context);
-  const [nameFilter, setNameFilter] = useState('');
-  const [rutFilter, setRutFilter] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [cafeFilter, setCafeFilter] = useState(''); // Nuevo filtro por sede de café
-  const [isLoading, setIsLoading] = useState(true);
+  const [editingRut, setEditingRut] = useState(null);
+  const [editedUserData, setEditedUserData] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 5;
+  const usersPerPage = 5; // Número de usuarios por página
 
   useEffect(() => {
-    const fetchData = async () => {
-      await actions.fetchUsersOnSystem();
-      await actions.fetchCafes(); 
-      setIsLoading(false);
-    };
-    fetchData();
+    actions.fetchUsersOnSystem();
+    actions.fetchCafes(); 
   }, []);
 
-  const handleNameFilterChange = (e) => {
-    setNameFilter(e.target.value);
-    setRutFilter('');
-    setRoleFilter('');
-    setCafeFilter('');
-    setCurrentPage(1);
+  const handleEditClick = (user) => {
+    if (editingRut === user.rut) return;
+    setEditingRut(user.rut);
+    setEditedUserData({ ...user });
   };
 
-  const handleRutFilterChange = (e) => {
-    setRutFilter(e.target.value);
-    setNameFilter('');
-    setRoleFilter('');
-    setCafeFilter('');
-    setCurrentPage(1);
+  const handleSaveClick = (user) => {
+    actions.editUser(user.rut, editedUserData).then((response) => {
+      if (response.success) {
+        alert(response.message);
+        setEditingRut(null);
+      } else {
+        alert(response.message);
+      }
+    });
   };
 
-  const handleRoleFilterChange = (e) => {
-    setRoleFilter(e.target.value);
-    setNameFilter('');
-    setRutFilter('');
-    setCafeFilter('');
-    setCurrentPage(1);
+  const handleCancelClick = () => {
+    setEditingRut(null);
+    setEditedUserData({});
   };
 
-  const handleCafeFilterChange = (e) => {
-    setCafeFilter(e.target.value);
-    setNameFilter('');
-    setRutFilter('');
-    setRoleFilter('');
-    setCurrentPage(1);
-  };
-
-  const filteredUsers = store.queriedUsers.filter(user => {
-    const matchesName = nameFilter
-      ? user.first_name.toLowerCase().startsWith(nameFilter.toLowerCase())
-      : true;
-    const matchesRut = rutFilter
-      ? user.rut.toLowerCase().startsWith(rutFilter.toLowerCase())
-      : true;
-    const matchesRole = roleFilter
-      ? user.role_id.toString() === roleFilter
-      : true;
-    const matchesCafe = cafeFilter
-      ? user.cafe_id.toString() === cafeFilter
-      : true;
-    return matchesName && matchesRut && matchesRole && matchesCafe;
-  });
-
+  // Paginación - Cálculo de la página actual y usuarios visibles
   const lastUserIndex = currentPage * usersPerPage;
   const firstUserIndex = lastUserIndex - usersPerPage;
-  const currentUsers = filteredUsers.slice(firstUserIndex, lastUserIndex);
+  const currentUsers = store.queriedUsers.slice(firstUserIndex, lastUserIndex);
 
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const totalPages = Math.ceil(store.queriedUsers.length / usersPerPage);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -87,100 +55,40 @@ const UserManagement = () => {
     <div className="container mt-4">
       <h3>Gestión de Usuarios</h3>
 
-      {isLoading ? (
-        <div className="spinner-container">
-          <div className="spinner"></div>
-        </div>
-      ) : (
-        <>
-          <div className="row mb-3">
-            <div className="col-md-3 mb-3">
-              <input
-                type="text"
-                placeholder="Filtrar por nombre"
-                className="form-control"
-                value={nameFilter}
-                onClick={() => {
-                  setRutFilter('');
-                  setRoleFilter('');
-                  setCafeFilter('');
-                }}
-                onChange={handleNameFilterChange}
-              />
-            </div>
-            <div className="col-md-3 mb-3">
-              <input
-                type="text"
-                placeholder="Filtrar por RUT"
-                className="form-control"
-                value={rutFilter}
-                onClick={() => {
-                  setNameFilter('');
-                  setRoleFilter('');
-                  setCafeFilter('');
-                }}
-                onChange={handleRutFilterChange}
-              />
-            </div>
-            <div className="col-md-3 mb-3">
-              <select
-                className="form-control"
-                value={roleFilter}
-                onChange={handleRoleFilterChange}
-              >
-                <option value="">Filtrar por Rol</option>
-                <option value="1">Administrador</option>
-                <option value="2">Gerente</option>
-                <option value="3">Vendedor</option>
-              </select>
-            </div>
-            <div className="col-md-3">
-              <select
-                className="form-control"
-                value={cafeFilter}
-                onChange={handleCafeFilterChange}
-              >
-                <option value="">Filtrar por Sede de Café</option>
-                {store.cafes && store.cafes.map(cafe => (
-                  <option key={cafe.id} value={cafe.id}>
-                    {cafe.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+      <div className="row">
+        {currentUsers.map((user) => (
+          <div key={user.rut} className="col-md-4 mb-3">
+            <UserDetailsCard
+              user={user} 
+              onEditClick={() => handleEditClick(user)} 
+              isEditing={editingRut === user.rut} 
+              editedUserData={editedUserData} 
+              setEditedUserData={setEditedUserData} 
+              onSaveClick={() => handleSaveClick(user)} 
+              onCancelClick={handleCancelClick} 
+              setEditingRut={setEditingRut} 
+            />
           </div>
+        ))}
+      </div>
 
-          {currentUsers && currentUsers.length > 0 ? (
-            <div className="row">
-              {currentUsers.map(user => (
-                <div key={user.rut} className="col-md-4">
-                  <UserDetailsCard user={user} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No hay usuarios registrados.</p>
-          )}
-
-          <div className="pagination-container mb-3">
-            <button
-              className="btn btn-secondary"
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-            >
-              Anterior
-            </button>
-            <span className="page-info">Página {currentPage} de {totalPages}</span>
-            <button
-              className="btn btn-secondary"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-            >
-              Siguiente
-            </button>
-          </div>
-        </>
-      )}
+      <div className="pagination-container mb-3 d-flex justify-content-center">
+        <button 
+          className="btn btn-secondary me-2" 
+          onClick={handlePreviousPage} 
+          disabled={currentPage === 1}
+        >
+          Anterior
+        </button>
+        <span className="page-info">Página {currentPage} de {totalPages}</span>
+        <button 
+          className="btn btn-secondary ms-2" 
+          onClick={handleNextPage} 
+          disabled={currentPage === totalPages}
+        >
+          Siguiente
+        </button>
+      </div>
     </div>
   );
 };

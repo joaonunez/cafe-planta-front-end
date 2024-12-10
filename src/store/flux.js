@@ -31,6 +31,43 @@ const getState = ({ getActions, getStore, setStore }) => {
       setLastInventoryPage: (pageUrl) => {
         setStore({ lastInventoryPage: pageUrl });
       },
+      // Ejemplo de implementación:
+      editUser: async (rut, data) => {
+        const token = localStorage.getItem("token");
+        try {
+          const response = await fetch(`http://localhost:3001/user/edit/${rut}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, 
+            },
+            body: JSON.stringify(data),
+            credentials: "include", 
+          });
+      
+          if (response.ok) {
+            const result = await response.json();
+            const updatedUser = result.user;
+      
+            // Actualizar la lista de usuarios en el store
+            const updatedUsers = getStore().queriedUsers.map((u) =>
+              u.rut === rut ? updatedUser : u
+            );
+            setStore({ queriedUsers: updatedUsers });
+            return { success: true, message: "Usuario actualizado exitosamente" };
+          } else {
+            const errorData = await response.json();
+            console.error("Error al editar usuario:", errorData);
+            return { success: false, message: errorData.error || "Error desconocido" };
+          }
+        } catch (error) {
+          console.error("Error en editUser:", error);
+          return { success: false, message: "Error de conexión al servidor" };
+        }
+      }
+      ,
+      
+
 
       // Obtiene la última página visitada
       getLastInventoryPage: () => {
