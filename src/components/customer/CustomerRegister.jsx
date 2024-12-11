@@ -10,7 +10,8 @@ const CustomerRegister = () => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // Mensaje general de error
+    const [serverErrors, setServerErrors] = useState({}); // Errores específicos del servidor
     const navigate = useNavigate();
 
     // Validaciones de los campos
@@ -22,7 +23,8 @@ const CustomerRegister = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage(''); // Limpiar mensaje de error al enviar el formulario
+        setErrorMessage(''); // Limpiar mensaje de error general
+        setServerErrors({}); // Limpiar errores específicos
 
         if (!validateRut(rut)) {
             setErrorMessage('El RUT no es válido. Formato esperado: 12345678-9');
@@ -78,7 +80,12 @@ const CustomerRegister = () => {
                 });
             }, 3000);
         } else {
-            setErrorMessage(message || 'Error en el registro');
+            if (typeof message === 'object' && message.error) {
+                setErrorMessage(message.error);
+                setServerErrors(message); // Almacenar errores específicos
+            } else {
+                setErrorMessage(message || 'Error en el registro');
+            }
         }
     };
 
@@ -95,61 +102,65 @@ const CustomerRegister = () => {
                     <label htmlFor="rut" className="form-label">RUT</label>
                     <input
                         type="text"
-                        className={`form-control ${!validateRut(rut) && rut ? 'is-invalid' : ''}`}
+                        className={`form-control ${serverErrors.error && serverErrors.error.includes('RUT') ? 'is-invalid' : ''}`}
                         id="rut"
                         value={rut}
                         onChange={(e) => setRut(e.target.value)}
                         required
                     />
-                    {!validateRut(rut) && rut && <div className="invalid-feedback">El RUT debe tener el formato 12345678-9</div>}
+                    {serverErrors.error && serverErrors.error.includes('RUT') && (
+                        <div className="invalid-feedback">{serverErrors.error}</div>
+                    )}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">Nombre</label>
                     <input
                         type="text"
-                        className={`form-control ${!validateName(name) && name ? 'is-invalid' : ''}`}
+                        className="form-control"
                         id="name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
                     />
-                    {!validateName(name) && name && <div className="invalid-feedback">El nombre debe tener al menos 3 caracteres.</div>}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="email" className="form-label">Email</label>
                     <input
                         type="email"
-                        className={`form-control ${!validateEmail(email) && email ? 'is-invalid' : ''}`}
+                        className={`form-control ${serverErrors.error && serverErrors.error.includes('Email') ? 'is-invalid' : ''}`}
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    {!validateEmail(email) && email && <div className="invalid-feedback">El formato del correo electrónico no es válido.</div>}
+                    {serverErrors.error && serverErrors.error.includes('Email') && (
+                        <div className="invalid-feedback">{serverErrors.error}</div>
+                    )}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="username" className="form-label">Nombre de Usuario</label>
                     <input
                         type="text"
-                        className={`form-control ${!validateUsername(username) && username ? 'is-invalid' : ''}`}
+                        className={`form-control ${serverErrors.error && serverErrors.error.includes('Username') ? 'is-invalid' : ''}`}
                         id="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                    {!validateUsername(username) && username && <div className="invalid-feedback">El nombre de usuario debe tener al menos 4 caracteres.</div>}
+                    {serverErrors.error && serverErrors.error.includes('Username') && (
+                        <div className="invalid-feedback">{serverErrors.error}</div>
+                    )}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="password" className="form-label">Contraseña</label>
                     <input
                         type="password"
-                        className={`form-control ${!validatePassword(password) && password ? 'is-invalid' : ''}`}
+                        className="form-control"
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    {!validatePassword(password) && password && <div className="invalid-feedback">La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.</div>}
                 </div>
                 <button type="submit" className="btn btn-primary">Registrar</button>
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleBack}>
