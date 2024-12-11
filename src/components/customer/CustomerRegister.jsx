@@ -25,32 +25,32 @@ const CustomerRegister = () => {
         e.preventDefault();
         setErrorMessage(''); // Limpiar mensaje de error general
         setServerErrors({}); // Limpiar errores específicos
-
+    
         if (!validateRut(rut)) {
             setErrorMessage('El RUT no es válido. Formato esperado: 12345678-9');
             return;
         }
-
+    
         if (!validateName(name)) {
             setErrorMessage('El nombre debe tener al menos 3 caracteres.');
             return;
         }
-
+    
         if (!validateEmail(email)) {
             setErrorMessage('El formato del correo electrónico no es válido.');
             return;
         }
-
+    
         if (!validateUsername(username)) {
             setErrorMessage('El nombre de usuario debe tener al menos 4 caracteres.');
             return;
         }
-
+    
         if (!validatePassword(password)) {
             setErrorMessage('La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula y un número.');
             return;
         }
-
+    
         const { success, message } = await actions.registerCustomer({
             rut,
             name,
@@ -58,7 +58,7 @@ const CustomerRegister = () => {
             username,
             password,
         });
-
+    
         if (success) {
             Swal.fire({
                 title: 'Registrando...',
@@ -68,7 +68,7 @@ const CustomerRegister = () => {
                     Swal.showLoading();
                 },
             });
-
+    
             setTimeout(() => {
                 Swal.close();
                 Swal.fire({
@@ -80,14 +80,17 @@ const CustomerRegister = () => {
                 });
             }, 3000);
         } else {
-            if (typeof message === 'object' && message.error) {
-                setErrorMessage(message.error);
+            if (message && message.error) {
+                setErrorMessage(message.error); // Mostramos el mensaje de error exacto
                 setServerErrors(message); // Almacenar errores específicos
+            } else if (typeof message === 'string') {
+                setErrorMessage(message); // Mostramos el mensaje directamente si es string
             } else {
-                setErrorMessage(message || 'Error en el registro');
+                setErrorMessage('Ocurrió un error inesperado al intentar registrar.'); // Mensaje de error genérico
             }
         }
     };
+    
 
     const handleBack = () => {
         navigate(-1);
