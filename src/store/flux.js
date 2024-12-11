@@ -35,7 +35,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       editUser: async (rut, data) => {
         const token = localStorage.getItem("token");
         try {
-          const response = await fetch(`http://localhost:3001/user/edit/${rut}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/user/edit/${rut}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -79,7 +79,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       loginCustomer: async (username, password) => {
         try {
-          const response = await fetch("http://localhost:3001/customer/login-customer", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/customer/login-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -108,7 +108,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       logoutCustomer: async () => {
         try {
-          const response = await fetch("http://localhost:3001/customer/logout-customer", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/customer/logout-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -133,7 +133,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       loginAdmin: async (username, password) => {
         try {
-          const response = await fetch("http://localhost:3001/user/admin-login", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/admin-login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -161,7 +161,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       logoutAdmin: async () => {
         try {
-          const response = await fetch("http://localhost:3001/user/logout-admin", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/logout-admin", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -185,7 +185,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       employeeLogin: async (username, password) => {
         try {
-          const response = await fetch("http://localhost:3001/user/employee-login", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/employee-login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -210,7 +210,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       logoutEmployee: async () => {
         try {
-          const response = await fetch("http://localhost:3001/user/logout-employee", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/logout-employee", {
             method: "POST",
             credentials: "include",
           });
@@ -227,7 +227,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       registerCustomer: async (customerData) => {
         try {
-          const response = await fetch("http://localhost:3001/customer/register-customer", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/customer/register-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -255,7 +255,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token } = getStore();
 
         try {
-          const response = await fetch("http://localhost:3001/cart/add_item", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/add_item", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -278,7 +278,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       getCartItems: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/cart/get_items", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/get_items", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -296,7 +296,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       removeFromCart: async (itemId) => {
         const { token, cart } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/cart/delete_item/${itemId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/cart/delete_item/${itemId}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -313,7 +313,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       updateCartItemQuantity: async (itemId, newQuantity) => {
         const { token, cart } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/cart/update_item/${itemId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/cart/update_item/${itemId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -337,7 +337,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       clearCartItems: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/cart/clear_items", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/clear_items", {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -354,7 +354,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       deleteCart: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/cart/delete", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/cart/delete", {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -374,7 +374,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       getFavorites: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/favorite/list-favorites-customer", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/favorite/list-favorites-customer", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -394,7 +394,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       addFavorite: async (itemId, itemTypeId) => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/favorite/add-to-favorites-customer", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/favorite/add-to-favorites-customer", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -418,7 +418,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       removeFavorite: async (itemId, itemTypeId) => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/favorite/remove-favorite-customer", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/favorite/remove-favorite-customer", {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -445,7 +445,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       createSale: async (totalAmount, comments, cartItems, diningAreaId) => {
         const { token, cartId } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/sale/create", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/create", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -484,7 +484,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       getLatestOrder: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/sale/latest", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/latest", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -502,7 +502,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       getOrderDetails: async (saleId) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/order_details/${saleId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/order_details/${saleId}`, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -522,7 +522,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       // ------------------------------------
       requestCustomerProducts: async () => {
         try {
-          const response = await fetch("http://localhost:3001/product/customer-request-products");
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/product/customer-request-products");
           const data = await response.json();
 
           if (response.ok) {
@@ -537,7 +537,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       requestCustomerCombos: async () => {
         try {
-          const response = await fetch("http://localhost:3001/combo_menu/customer-request-combos");
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/combo_menu/customer-request-combos");
           const data = await response.json();
 
           if (response.ok) {
@@ -552,7 +552,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       fetchAdminProducts: async () => {
         try {
-          const response = await fetch("http://localhost:3001/product/admin-get-products", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/product/admin-get-products", {
             method: "GET",
             headers: { "Content-Type": "application/json" },
           });
@@ -570,7 +570,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       fetchProductCategories: async () => {
         try {
-          const response = await fetch("http://localhost:3001/product_category");
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/product_category");
           const data = await response.json();
 
           if (response.ok) {
@@ -589,7 +589,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchUsersOnSystem: async () => {
         const { token } = getStore(); // Asegurarse de obtener el token actual
         try {
-          const response = await fetch("http://localhost:3001/user/get_users_on_system", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/get_users_on_system", {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -616,7 +616,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchOrdersInProgress: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/sale/in_progress", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/in_progress", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -643,7 +643,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       takeOrder: async (orderId) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/take_order/${orderId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/take_order/${orderId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -670,7 +670,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchTakenOrders: async () => {
         const { token, employee } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/taken_orders/${employee.rut}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/taken_orders/${employee.rut}`, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -687,7 +687,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       fetchAllSalesRequestByAdmin: async () => {
         try {
-          const response = await fetch(`http://localhost:3001/sale/request_all_sales_by_admin`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/request_all_sales_by_admin`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${getStore().token}`
@@ -707,7 +707,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       deleteSaleByAdmin: async (saleId) => {
         try {
-          const response = await fetch(`http://localhost:3001/sale/delete_sale_by_admin/${saleId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/delete_sale_by_admin/${saleId}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${getStore().token}`,
@@ -730,7 +730,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       fetchCafes: async () => {
         try {
-          const response = await fetch("http://localhost:3001/cafe/");
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/cafe/");
           if (response.ok) {
             const data = await response.json();
             setStore({ cafes: data });
@@ -743,7 +743,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       fetchSaleDetails: async (saleId) => {
         try {
-          const response = await fetch(`http://localhost:3001/sale_detail/${saleId}`);
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale_detail/${saleId}`);
           if (response.ok) {
             const details = await response.json();
             return details.map(item => ({
@@ -763,7 +763,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchSaleEditDetails: async (saleId) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/${saleId}/edit-details`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/${saleId}/edit-details`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`
@@ -786,7 +786,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       updateSaleDetails: async (saleId, updatedData) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/${saleId}/edit-details`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/${saleId}/edit-details`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -812,7 +812,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       markOrderAsDelivered: async (orderId) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/mark_as_delivered/${orderId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/mark_as_delivered/${orderId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -834,7 +834,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchCompletedOrders: async () => {
         const { token, employee } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/completed_orders/${employee.rut}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/completed_orders/${employee.rut}`, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include"
@@ -854,7 +854,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       addProduct: async (formData) => {
         try {
           // Hacer la solicitud POST al backend
-          const response = await fetch("http://localhost:3001/product/create", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/product/create", {
             method: "POST",
             body: formData, // Enviar el FormData directamente
           });
@@ -882,7 +882,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token } = getStore();
 
         try {
-          const response = await fetch(`http://localhost:3001/product/update/${productId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/product/update/${productId}`, {
             method: "PUT",
             headers: {
               Authorization: `Bearer ${token}`, // Token incluido para autenticación
@@ -916,7 +916,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { admin, token } = getStore();
 
         try {
-          const response = await fetch(`http://localhost:3001/product/delete/${productId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/product/delete/${productId}`, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -945,7 +945,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       fetchCloudinaryStats: async () => {
         try {
-          const response = await fetch("http://localhost:3001/cloudinary/stats", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/cloudinary/stats", {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -962,7 +962,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       fetchProductById: async (productId) => {
         try {
-          const response = await fetch(`http://localhost:3001/product/${productId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/product/${productId}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -984,7 +984,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       fetchAdminCombos: async () => {
         try {
-          const response = await fetch("http://localhost:3001/combo_menu/admin-get-combos", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/combo_menu/admin-get-combos", {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -1005,7 +1005,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       fetchComboById: async (comboId) => {
         try {
-          const response = await fetch(`http://localhost:3001/combo_menu/get-combo/${comboId}`);
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/get-combo/${comboId}`);
           if (!response.ok) throw new Error("Error al obtener el combo");
           return await response.json();
         } catch (error) {
@@ -1015,7 +1015,7 @@ const getState = ({ getActions, getStore, setStore }) => {
 
       searchProducts: async (term) => {
         try {
-          const response = await fetch(`http://localhost:3001/combo_menu/search-products?term=${term}`);
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/search-products?term=${term}`);
           if (!response.ok) throw new Error("Error al buscar productos");
           return await response.json();
         } catch (error) {
@@ -1026,7 +1026,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token } = getStore();
 
         try {
-          const response = await fetch(`http://localhost:3001/combo_menu/update-combo/${comboId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/update-combo/${comboId}`, {
             method: "PUT",
             headers: {
               Authorization: `Bearer ${token}`, // Token incluido para autenticación
@@ -1062,7 +1062,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { token } = getStore();
 
         try {
-          const response = await fetch("http://localhost:3001/combo_menu/create", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/combo_menu/create", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`, // Si usas autenticación
@@ -1089,7 +1089,7 @@ const getState = ({ getActions, getStore, setStore }) => {
         const { admin, token } = getStore();
 
         try {
-          const response = await fetch(`http://localhost:3001/combo_menu/delete/${comboId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/combo_menu/delete/${comboId}`, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -1119,7 +1119,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchPurchaseHistory: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/sale/purchase_history", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/purchase_history", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -1146,7 +1146,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchOrderDetails: async (orderId) => {
         const { token } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/sale/order_details/${orderId}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/order_details/${orderId}`, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -1163,7 +1163,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       validateLatestOrder: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/sale/validate_latest_order", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/sale/validate_latest_order", {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
             credentials: "include",
@@ -1185,7 +1185,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       fetchDiningAreas: async () => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/dining_area/list", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/list", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -1205,7 +1205,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       createDiningArea: async (number, cafeId) => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/dining_area/create", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/create", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -1238,7 +1238,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       scanQR: async (qrContent) => {
         const { token } = getStore();
         try {
-          const response = await fetch("http://localhost:3001/dining_area/scan_qr", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/dining_area/scan_qr", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
