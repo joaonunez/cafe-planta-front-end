@@ -10,8 +10,6 @@ const CustomerRegister = () => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState(''); // Mensaje general de error
-    const [serverErrors, setServerErrors] = useState({}); // Errores específicos del servidor
     const navigate = useNavigate();
 
     // Validaciones de los campos
@@ -23,34 +21,32 @@ const CustomerRegister = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage(''); // Limpiar mensaje de error general
-        setServerErrors({}); // Limpiar errores específicos
-    
+
         if (!validateRut(rut)) {
-            setErrorMessage('El RUT no es válido. Formato esperado: 12345678-9');
+            Swal.fire('Error', 'El RUT no es válido. Formato esperado: 12345678-9', 'error');
             return;
         }
-    
+
         if (!validateName(name)) {
-            setErrorMessage('El nombre debe tener al menos 3 caracteres.');
+            Swal.fire('Error', 'El nombre debe tener al menos 3 caracteres.', 'error');
             return;
         }
-    
+
         if (!validateEmail(email)) {
-            setErrorMessage('El formato del correo electrónico no es válido.');
+            Swal.fire('Error', 'El formato del correo electrónico no es válido.', 'error');
             return;
         }
-    
+
         if (!validateUsername(username)) {
-            setErrorMessage('El nombre de usuario debe tener al menos 4 caracteres.');
+            Swal.fire('Error', 'El nombre de usuario debe tener al menos 4 caracteres.', 'error');
             return;
         }
-    
+
         if (!validatePassword(password)) {
-            setErrorMessage('La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula y un número.');
+            Swal.fire('Error', 'La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula y un número.', 'error');
             return;
         }
-    
+
         const { success, message } = await actions.registerCustomer({
             rut,
             name,
@@ -58,7 +54,7 @@ const CustomerRegister = () => {
             username,
             password,
         });
-    
+
         if (success) {
             Swal.fire({
                 title: 'Registrando...',
@@ -68,7 +64,7 @@ const CustomerRegister = () => {
                     Swal.showLoading();
                 },
             });
-    
+
             setTimeout(() => {
                 Swal.close();
                 Swal.fire({
@@ -81,16 +77,14 @@ const CustomerRegister = () => {
             }, 3000);
         } else {
             if (message && message.error) {
-                setErrorMessage(message.error); // Mostramos el mensaje de error exacto
-                setServerErrors(message); // Almacenar errores específicos
+                Swal.fire('Error', message.error, 'error'); // Mostramos el mensaje de error exacto en SweetAlert
             } else if (typeof message === 'string') {
-                setErrorMessage(message); // Mostramos el mensaje directamente si es string
+                Swal.fire('Error', message, 'error'); // Mostramos el mensaje directamente si es string
             } else {
-                setErrorMessage('Ocurrió un error inesperado al intentar registrar.'); // Mensaje de error genérico
+                Swal.fire('Error', 'Ocurrió un error inesperado al intentar registrar.', 'error'); // Mensaje de error genérico
             }
         }
     };
-    
 
     const handleBack = () => {
         navigate(-1);
@@ -99,21 +93,17 @@ const CustomerRegister = () => {
     return (
         <div className="container mt-5">
             <h2>Registro de Cliente</h2>
-            {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
             <form onSubmit={handleSubmit} className="border p-4 shadow-sm bg-light">
                 <div className="mb-3">
                     <label htmlFor="rut" className="form-label">RUT</label>
                     <input
                         type="text"
-                        className={`form-control ${serverErrors.error && serverErrors.error.includes('RUT') ? 'is-invalid' : ''}`}
+                        className="form-control"
                         id="rut"
                         value={rut}
                         onChange={(e) => setRut(e.target.value)}
                         required
                     />
-                    {serverErrors.error && serverErrors.error.includes('RUT') && (
-                        <div className="invalid-feedback">{serverErrors.error}</div>
-                    )}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">Nombre</label>
@@ -130,29 +120,23 @@ const CustomerRegister = () => {
                     <label htmlFor="email" className="form-label">Email</label>
                     <input
                         type="email"
-                        className={`form-control ${serverErrors.error && serverErrors.error.includes('Email') ? 'is-invalid' : ''}`}
+                        className="form-control"
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    {serverErrors.error && serverErrors.error.includes('Email') && (
-                        <div className="invalid-feedback">{serverErrors.error}</div>
-                    )}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="username" className="form-label">Nombre de Usuario</label>
                     <input
                         type="text"
-                        className={`form-control ${serverErrors.error && serverErrors.error.includes('Username') ? 'is-invalid' : ''}`}
+                        className="form-control"
                         id="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                    {serverErrors.error && serverErrors.error.includes('Username') && (
-                        <div className="invalid-feedback">{serverErrors.error}</div>
-                    )}
                 </div>
                 <div className="mb-3">
                     <label htmlFor="password" className="form-label">Contraseña</label>
