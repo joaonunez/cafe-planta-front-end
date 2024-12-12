@@ -1,4 +1,3 @@
-// ViewAllSales.js
 import React, { useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../../store/context';
@@ -33,15 +32,18 @@ const ViewAllSales = () => {
                 <p>No hay ventas para mostrar</p>
             ) : (
                 <div className="sale-cards-list">
-                    {store.allSalesRequestByAdmin.map((sale) => (
-                        <SaleDetailsCard
-                            key={sale.id}
-                            sale={sale}
-                            onDelete={handleDeleteSale}
-                            onViewDetails={() => handleViewDetails(sale.id)}
-                            onSaveChanges={handleSaveChanges}
-                        />
-                    ))}
+                    {store.allSalesRequestByAdmin
+                        .slice() // Creamos una copia del array para evitar modificar el estado original
+                        .reverse() // Reversamos el orden de las ventas
+                        .map((sale) => (
+                            <SaleDetailsCard
+                                key={sale.id}
+                                sale={sale}
+                                onDelete={handleDeleteSale}
+                                onViewDetails={() => handleViewDetails(sale.id)}
+                                onSaveChanges={handleSaveChanges}
+                            />
+                        ))}
                 </div>
             )}
         </div>
