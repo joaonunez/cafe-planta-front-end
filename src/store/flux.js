@@ -760,6 +760,37 @@ const getState = ({ getActions, getStore, setStore }) => {
           return [];
         }
       },
+      fetchOrderDetails: async (saleId) => {
+        try {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/sale/order_details/${saleId}`, {
+            method: "GET",
+            headers: { 
+              Authorization: `Bearer ${getStore().token}` 
+            },
+            credentials: "include"
+          });
+      
+          if (response.ok) {
+            const details = await response.json();
+            return details.items.map(item => ({
+              ...item,
+              name: item.name,
+              image_url: item.image_url,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              total_price: item.total_price
+            }));
+          } else {
+            console.error("Error al obtener los detalles de la venta (nuevo fetch)");
+            return [];
+          }
+        } catch (error) {
+          console.error("Error en fetchOrderDetails:", error);
+          return [];
+        }
+      }
+      ,
+      
       fetchSaleEditDetails: async (saleId) => {
         const { token } = getStore();
         try {
