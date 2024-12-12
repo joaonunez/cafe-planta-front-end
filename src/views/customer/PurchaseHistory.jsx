@@ -1,3 +1,4 @@
+// PurchaseHistory.js
 import React from "react";
 import CustomerOrder from "../../components/customer/CustomerOrder";
 import CustomerPurchaseHistory from "../../components/customer/CustomerPurchaseHistory";

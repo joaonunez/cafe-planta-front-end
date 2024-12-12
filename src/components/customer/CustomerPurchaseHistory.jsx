@@ -1,3 +1,4 @@
+// CustomerPurchaseHistory.js
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../../store/context";
 
@@ -29,7 +30,7 @@ const CustomerPurchaseHistory = () => {
           <div className="order-details">
             <h3 className="order-subtitle">Pedido #{order.id}</h3>
             <p>
-              <strong>Fecha:</strong> {new Date(order.date).toLocaleString()}
+              <strong>Fecha:</strong> {order.date}
             </p>
             <p>
               <strong>Total:</strong> ${order.total_amount.toLocaleString("es-CL")}
