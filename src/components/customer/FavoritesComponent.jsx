@@ -71,7 +71,7 @@ const FavoritesComponent = () => {
                       style={{ height: "150px", objectFit: "cover" }} 
                     />
                     <div className="card-body">
-                      <h5 className="card-title">{favorite.item_name}</h5>
+                      <h5 className="card-title text-center">{favorite.item_name}</h5>
                       <p className="card-text">
                         <strong>Precio:</strong> ${favorite.price?.toLocaleString('es-CL')}
                       </p>
@@ -80,7 +80,12 @@ const FavoritesComponent = () => {
                       </p>
                     </div>
                     <div className="card-footer text-center">
-                      <button className="btn btn-danger btn-sm">Eliminar de Favoritos</button>
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={() => actions.removeFavorite(favorite.item_id, 2)} // 2 = Producto
+                      >
+                        Eliminar de Favoritos
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -112,7 +117,7 @@ const FavoritesComponent = () => {
                       style={{ height: "150px", objectFit: "cover" }} 
                     />
                     <div className="card-body">
-                      <h5 className="card-title">{favorite.item_name}</h5>
+                      <h5 className="card-title text-center">{favorite.item_name}</h5>
                       <p className="card-text">
                         <strong>Precio:</strong> ${favorite.price?.toLocaleString('es-CL')}
                       </p>
@@ -121,7 +126,12 @@ const FavoritesComponent = () => {
                       </p>
                     </div>
                     <div className="card-footer text-center">
-                      <button className="btn btn-danger btn-sm">Eliminar de Favoritos</button>
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={() => actions.removeFavorite(favorite.item_id, 1)} // 1 = Combo
+                      >
+                        Eliminar de Favoritos
+                      </button>
                     </div>
                   </div>
                 </div>
