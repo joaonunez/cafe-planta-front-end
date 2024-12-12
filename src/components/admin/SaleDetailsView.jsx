@@ -1,4 +1,3 @@
-// SaleDetailsView.jsx
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Context } from '../../store/context';
@@ -12,7 +11,8 @@ const SaleDetailsView = () => {
 
   useEffect(() => {
     const fetchSaleDetails = async () => {
-      const details = await actions.fetchSaleDetails(saleId);
+      // Aquí utilizamos el nuevo fetch
+      const details = await actions.fetchOrderDetails(saleId);
       setSaleDetails(details);
       setIsLoading(false);
     };
