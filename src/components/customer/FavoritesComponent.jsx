@@ -18,7 +18,7 @@ const FavoritesComponent = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="text-center">Mis Favoritos</h2>
+      <h2 className="text-center mb-4">Mis Favoritos</h2>
 
       <ul className="nav nav-tabs d-flex justify-content-center" id="myTab" role="tablist">
         <li className="nav-item" role="presentation">
@@ -51,8 +51,7 @@ const FavoritesComponent = () => {
         </li>
       </ul>
 
-      <div className="tab-content mt-3" id="myTabContent">
-        
+      <div className="tab-content mt-4" id="myTabContent">
         {/* Productos favoritos */}
         <div
           className="tab-pane fade show active"
@@ -64,29 +63,33 @@ const FavoritesComponent = () => {
             <div className="row">
               {productFavorites.map((favorite) => (
                 <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4" key={favorite.item_id}>
-                  <div className="card shadow-sm">
-                    <img
-                      src={favorite.image_url || "/path-to-default-image.jpg"}
-                      className="card-img-top"
-                      alt={favorite.item_name}
-                      style={{ height: "150px", objectFit: "cover" }}
+                  <div className="card h-100">
+                    <img 
+                      src={favorite.image_url || '/default-image.jpg'} 
+                      className="card-img-top" 
+                      alt={favorite.item_name} 
+                      style={{ height: "150px", objectFit: "cover" }} 
                     />
                     <div className="card-body">
                       <h5 className="card-title">{favorite.item_name}</h5>
                       <p className="card-text">
-                        Precio: <strong>${favorite.price?.toLocaleString('es-CL') || 'No disponible'}</strong>
+                        <strong>Precio:</strong> ${favorite.price?.toLocaleString('es-CL')}
                       </p>
-                      <p className="card-text text-truncate">
-                        Descripción: {favorite.description || 'No hay descripción disponible'}
+                      <p className="card-text">
+                        <strong>Stock:</strong> {favorite.stock || "No disponible"}
                       </p>
-                      <button className="btn btn-primary btn-sm">Ver Detalles</button>
+                    </div>
+                    <div className="card-footer text-center">
+                      <button className="btn btn-danger btn-sm">Eliminar de Favoritos</button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center mt-3">No tienes productos favoritos</p>
+            <div className="alert alert-info text-center" role="alert">
+              No tienes productos favoritos
+            </div>
           )}
         </div>
 
@@ -101,29 +104,33 @@ const FavoritesComponent = () => {
             <div className="row">
               {comboFavorites.map((favorite) => (
                 <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4" key={favorite.item_id}>
-                  <div className="card shadow-sm">
-                    <img
-                      src={favorite.image_url || "/path-to-default-image.jpg"}
-                      className="card-img-top"
-                      alt={favorite.item_name}
-                      style={{ height: "150px", objectFit: "cover" }}
+                  <div className="card h-100">
+                    <img 
+                      src={favorite.image_url || '/default-image.jpg'} 
+                      className="card-img-top" 
+                      alt={favorite.item_name} 
+                      style={{ height: "150px", objectFit: "cover" }} 
                     />
                     <div className="card-body">
                       <h5 className="card-title">{favorite.item_name}</h5>
                       <p className="card-text">
-                        Precio: <strong>${favorite.price?.toLocaleString('es-CL') || 'No disponible'}</strong>
+                        <strong>Precio:</strong> ${favorite.price?.toLocaleString('es-CL')}
                       </p>
-                      <p className="card-text text-truncate">
-                        Descripción: {favorite.description || 'No hay descripción disponible'}
+                      <p className="card-text">
+                        <strong>Descripción:</strong> {favorite.description || "Sin descripción"}
                       </p>
-                      <button className="btn btn-primary btn-sm">Ver Detalles</button>
+                    </div>
+                    <div className="card-footer text-center">
+                      <button className="btn btn-danger btn-sm">Eliminar de Favoritos</button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center mt-3">No tienes combos favoritos</p>
+            <div className="alert alert-info text-center" role="alert">
+              No tienes combos favoritos
+            </div>
           )}
         </div>
       </div>
