@@ -6,16 +6,23 @@ const SaleDetailsView = () => {
   const { saleId } = useParams();
   const navigate = useNavigate();
   const { actions } = useContext(Context);
-  const [saleDetails, setSaleDetails] = useState([]);
+  const [saleDetails, setSaleDetails] = useState([]); // Cambiar a un array vacío
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!saleId) {
+      console.error("El saleId no está definido en useParams");
+      return;
+    }
+
     const fetchSaleDetails = async () => {
-      // Aquí utilizamos el nuevo fetch
+      console.log(`Obteniendo detalles de la venta con ID: ${saleId}`); // <-- LOG IMPORTANTE
       const details = await actions.fetchOrderDetails(saleId);
-      setSaleDetails(details);
+      console.log('Respuesta del fetchOrderDetails:', details); // <-- LOG IMPORTANTE
+      setSaleDetails(details.items || []); // Aquí tomamos el campo `items` directamente
       setIsLoading(false);
     };
+
     fetchSaleDetails();
   }, [saleId]);
 

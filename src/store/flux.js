@@ -772,23 +772,18 @@ const getState = ({ getActions, getStore, setStore }) => {
       
           if (response.ok) {
             const details = await response.json();
-            return details.items.map(item => ({
-              ...item,
-              name: item.name,
-              image_url: item.image_url,
-              quantity: item.quantity,
-              unit_price: item.unit_price,
-              total_price: item.total_price
-            }));
+            console.log('Respuesta del servidor para /sale/order_details:', details); // <-- LOG IMPORTANTE
+            return details; // Retorna la respuesta completa, no solo items
           } else {
-            console.error("Error al obtener los detalles de la venta (nuevo fetch)");
-            return [];
+            console.error("Error al obtener los detalles de la venta");
+            return { items: [] }; // Devuelve una estructura segura
           }
         } catch (error) {
           console.error("Error en fetchOrderDetails:", error);
-          return [];
+          return { items: [] };
         }
       }
+      
       ,
       
       fetchSaleEditDetails: async (saleId) => {
