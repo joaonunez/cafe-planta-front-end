@@ -68,55 +68,6 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
                 onChange={handleChange}
                 className="form-control"
               />
-
-              <label><strong>Cafetería:</strong></label>
-              <select
-                name="cafe_id"
-                value={editedSale.cafe_id || ""}
-                onChange={handleChange}
-                className="form-control"
-              >
-                <option value="">Seleccione una Cafetería</option>
-                {store.saleEditData?.cafes && store.saleEditData.cafes.map((cafe) => (
-                  <option key={cafe.id} value={cafe.id}>{cafe.name}</option>
-                ))}
-              </select>
-
-              <label><strong>Mesero:</strong></label>
-              <select
-                name="waiter_rut"
-                value={editedSale.waiter_rut || ""}
-                onChange={handleChange}
-                className="form-control"
-              >
-                <option value="">Seleccione un Mesero</option>
-                {store.saleEditData?.waiters && 
-                  store.saleEditData.waiters
-                    .filter(waiter => waiter.cafe_id === parseInt(editedSale.cafe_id))
-                    .map((waiter) => (
-                      <option key={waiter.rut} value={waiter.rut}>
-                        {waiter.first_name} {waiter.last_name_father}
-                      </option>
-                    ))
-                }
-              </select>
-
-              <label><strong>Mesa:</strong></label>
-              <select
-                name="dining_area_id"
-                value={editedSale.dining_area_id || ""}
-                onChange={handleChange}
-                className="form-control"
-              >
-                <option value="">Seleccione una Mesa</option>
-                {store.saleEditData?.dining_areas && 
-                  store.saleEditData.dining_areas
-                    .filter(area => area.cafe_id === parseInt(editedSale.cafe_id))
-                    .map((area) => (
-                      <option key={area.id} value={area.id}>{area.number}</option>
-                    ))
-                }
-              </select>
             </div>
           ) : (
             <div>
@@ -124,7 +75,6 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
               <p><strong>Comentarios:</strong> {sale.comments || "Sin comentarios"}</p>
               <p><strong>Cafetería:</strong> {sale.cafe_name || "Aún sin asignar"}</p>
               <p><strong>Mesero:</strong> {sale.waiter_name || "Aún sin asignar"}</p>
-              <p><strong>Mesa:</strong> {sale.dining_area_id ? `${sale.dining_area_number}` : "Aún sin asignar"}</p>
             </div>
           )}
         </div>
