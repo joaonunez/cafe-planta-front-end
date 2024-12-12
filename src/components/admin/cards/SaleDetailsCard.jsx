@@ -1,3 +1,4 @@
+// SaleDetailsCard.js
 import React, { useState, useContext, useEffect } from 'react';
 import { Context } from '../../../store/context';
 
@@ -36,10 +37,6 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
     }));
   };
 
-  // Condiciones para deshabilitar los campos de selección
-  const isDiningAreaDisabled = !editedSale.cafe_id;
-  const isWaiterDisabled = !editedSale.cafe_id;
-
   return (
     <div className="sale-card">
       <div className="sale-card-header">
@@ -48,9 +45,8 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
       </div>
       <div className="sale-card-body">
         <div className="sale-detail">
-          <p><strong>Fecha:</strong> {new Date(sale.date).toLocaleString()}</p>
+          <p><strong>Fecha:</strong> {sale.date}</p>
           
-          {/* Mostrar el nombre del cliente (Inmodificable) */}
           <p><strong>Cliente:</strong> {sale.customer_name || "Aún sin asignar"}</p>
           
           {isEditing ? (
@@ -92,7 +88,6 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
                 value={editedSale.waiter_rut || ""}
                 onChange={handleChange}
                 className="form-control"
-                disabled={isWaiterDisabled}
               >
                 <option value="">Seleccione un Mesero</option>
                 {store.saleEditData?.waiters && 
@@ -112,7 +107,6 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
                 value={editedSale.dining_area_id || ""}
                 onChange={handleChange}
                 className="form-control"
-                disabled={isDiningAreaDisabled}
               >
                 <option value="">Seleccione una Mesa</option>
                 {store.saleEditData?.dining_areas && 
