@@ -20,7 +20,7 @@ const ViewAllSales = () => {
     };
 
     const handleViewDetails = (saleId) => {
-        navigate(`/admin/view-admin-all-sales/view-details/${saleId}`);
+        navigate(`/admin/view-admin-all-sales/${saleId}`);
     };
 
     const handleSaveChanges = (updatedSale) => {
