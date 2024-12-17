@@ -1,6 +1,7 @@
-import React, { useContext, useEffect } from "react";
-import { FiEdit } from "react-icons/fi"; // Ícono del lápiz de react-icons
+import React, { useContext, useEffect, useState } from "react";
+import { FiEdit } from "react-icons/fi"; 
 import { Context } from '../../../store/context';
+import ConfirmDeleteUser from '../modals/ConfirmDeleteUser'; // Importar el modal
 
 const UserDetailsCard = ({
   user,
@@ -10,15 +11,28 @@ const UserDetailsCard = ({
   setEditedUserData,
   onSaveClick, 
   onCancelClick,
-  setEditingRut // Se recibe setEditingRut desde el componente padre
+  setEditingRut
 }) => {
   const { store, actions } = useContext(Context);
+
+  // Estado para controlar la visibilidad del modal de confirmación
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (!store.cafes.length) {
       actions.fetchCafes();
     }
   }, [store.cafes.length]);
+
+  // Función para manejar la confirmación de eliminación
+  const handleConfirmDelete = async (adminPassword) => {
+    const result = await actions.deleteUser(user.rut, adminPassword);
+    if (result.success) {
+      setShowDeleteModal(false);
+    } else {
+      alert(`Error: ${result.message}`);
+    }
+  };
 
   return (
     <div className="user-card border p-3">
@@ -37,7 +51,7 @@ const UserDetailsCard = ({
             {user.first_name} {user.last_name_father} {user.last_name_mother}
           </h5>
         )}
-        
+
         {isEditing ? (
           <>
             <button 
@@ -52,9 +66,20 @@ const UserDetailsCard = ({
             </button>
           </>
         ) : (
-          <button className="btn btn-sm btn-primary" onClick={onEditClick}>
-            <FiEdit size={16} /> 
-          </button>
+          <div>
+            <button className="btn btn-sm btn-primary me-2" onClick={onEditClick}>
+              <FiEdit size={16} /> 
+            </button>
+            {/* Botón para eliminar al usuario, sólo para admins */}
+            {store.admin && (
+              <button 
+                className="btn btn-sm btn-danger"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Eliminar
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -156,6 +181,15 @@ const UserDetailsCard = ({
           </>
         )}
       </div>
+
+      {/* Modal de Confirmación de Eliminación de Usuario */}
+      {showDeleteModal && (
+        <ConfirmDeleteUser
+          user={user}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </div>
   );
 };

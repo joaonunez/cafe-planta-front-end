@@ -20,6 +20,7 @@ import CreateCombo from "../../components/admin/CreateCombo";
 import ManageDiningAreas from "../../components/admin/ManageDiningAreas";
 import CreateDiningAreaForm from "../../components/admin/CreateDiningArea";
 import SaleDetailsView from "../../components/admin/SaleDetailsView";
+import CreateUser from "../../components/admin/CreateUser";
 
 const AdminHome = () => {
   const { store } = useContext(Context);
@@ -237,6 +238,7 @@ const AdminHome = () => {
           <Route path="/manage-dining-areas" element={<ManageDiningAreas />} />
           <Route path="/create-dining-area" element={<CreateDiningAreaForm />} />
           <Route path="/view-admin-all-sales/view-details/:saleId" element={<SaleDetailsView />} />
+          <Route path="/create-user" element={<CreateUser />} />
         </Routes>
       </div>
     </>
