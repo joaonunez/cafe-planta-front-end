@@ -48,7 +48,7 @@ const SaleDetailsCard = ({ sale, onDelete, onViewDetails, onSaveChanges }) => {
       </div>
       <div className="sale-card-body">
         <div className="sale-detail">
-          <p><strong>Fecha:</strong> {new Date(sale.date).toLocaleString()}</p>
+          <p><strong>Fecha:</strong> {sale.date}</p>
           
           {/* Mostrar el nombre del cliente (Inmodificable) */}
           <p><strong>Cliente:</strong> {sale.customer_name || "Aún sin asignar"}</p>

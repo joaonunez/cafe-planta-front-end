@@ -39,7 +39,7 @@ const EmployeeOrders = () => {
                     <strong>Cafetería:</strong> {order.cafe_name || "Sin asignar"}
                   </li>
                   <li className="list-group-item">
-                    <strong>Fecha:</strong> {new Date(order.date).toLocaleString()}
+                    <strong>Fecha:</strong> {order.date}
                   </li>
                   <li className="list-group-item">
                     <strong>Monto Total:</strong> ${order.total_amount.toLocaleString("es-CL")}
