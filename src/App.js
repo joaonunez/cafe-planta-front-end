@@ -9,6 +9,7 @@ import AdminHome from './views/admin/AdminHome';
 import AdminLoginView from './views/admin/AdminLoginView';
 import EmployeeHome from './views/employee/EmployeeHome'; // Importa la vista del home del empleado
 import EmployeeLoginView from './views/employee/EmployeLoginView';
+import ForgotPassword from './components/admin/ForgotPassword';
 
 function App() {
   const { store } = useContext(Context);
@@ -43,6 +44,9 @@ function App() {
       {/* Rutas del empleado */}
       <Route path="/employee-login" element={<EmployeeLoginView />} />
       <Route path="/employee/*" element={<EmployeeHome />} />
+    
+
+      <Route path="/forgot-password" element={<ForgotPassword />} />
     </Routes>
   );
 }

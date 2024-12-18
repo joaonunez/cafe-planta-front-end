@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Importa Link
 import { Context } from '../../store/context';
 
 const AdminLogin = () => {
@@ -53,6 +53,11 @@ const AdminLogin = () => {
                 </div>
                 <button type="submit" className="btn btn-primary w-100">Iniciar Sesión</button>
             </form>
+            <div className="text-center mt-3">
+                <Link to="/forgot-password" className="text-decoration-none">
+                    ¿Olvidaste tu contraseña?
+                </Link>
+            </div>
         </div>
     );
 };

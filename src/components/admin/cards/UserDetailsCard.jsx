@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FiEdit } from "react-icons/fi"; 
 import { Context } from '../../../store/context';
-import ConfirmDeleteUser from '../modals/ConfirmDeleteUser'; // Importar el modal
+import ConfirmDeleteUser from '../modals/ConfirmDeleteUser';
+import ConfirmChangeUserPassword from "../modals/ConfirmChangeUserPassword"; // Nuevo modal
 
 const UserDetailsCard = ({
   user,
@@ -15,8 +16,8 @@ const UserDetailsCard = ({
 }) => {
   const { store, actions } = useContext(Context);
 
-  // Estado para controlar la visibilidad del modal de confirmación
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
   useEffect(() => {
     if (!store.cafes.length) {
@@ -24,11 +25,20 @@ const UserDetailsCard = ({
     }
   }, [store.cafes.length]);
 
-  // Función para manejar la confirmación de eliminación
   const handleConfirmDelete = async (adminPassword) => {
     const result = await actions.deleteUser(user.rut, adminPassword);
     if (result.success) {
       setShowDeleteModal(false);
+    } else {
+      alert(`Error: ${result.message}`);
+    }
+  };
+
+  const handleChangePassword = async (adminPassword, newPassword) => {
+    const result = await actions.changeUserPassword(user.rut, adminPassword, newPassword);
+    if (result.success) {
+      alert(result.message);
+      setShowChangePasswordModal(false);
     } else {
       alert(`Error: ${result.message}`);
     }
@@ -70,10 +80,9 @@ const UserDetailsCard = ({
             <button className="btn btn-sm btn-primary me-2" onClick={onEditClick}>
               <FiEdit size={16} /> 
             </button>
-            {/* Botón para eliminar al usuario, sólo para admins */}
             {store.admin && (
               <button 
-                className="btn btn-sm btn-danger"
+                className="btn btn-sm btn-danger me-2"
                 onClick={() => setShowDeleteModal(true)}
               >
                 Eliminar
@@ -181,13 +190,31 @@ const UserDetailsCard = ({
           </>
         )}
       </div>
+      
+      {!isEditing && store.admin && (
+        <div className="mt-3 d-flex justify-content-end">
+          <button
+            className="btn btn-warning btn-sm"
+            onClick={() => setShowChangePasswordModal(true)}
+          >
+            Cambiar Contraseña
+          </button>
+        </div>
+      )}
 
-      {/* Modal de Confirmación de Eliminación de Usuario */}
       {showDeleteModal && (
         <ConfirmDeleteUser
           user={user}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={handleConfirmDelete}
+        />
+      )}
+
+      {showChangePasswordModal && (
+        <ConfirmChangeUserPassword
+          user={user}
+          onClose={() => setShowChangePasswordModal(false)}
+          onConfirm={handleChangePassword}
         />
       )}
     </div>
