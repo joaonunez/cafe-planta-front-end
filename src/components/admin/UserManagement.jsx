@@ -1,6 +1,7 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Context } from '../../store/context';
 import UserDetailsCard from './cards/UserDetailsCard';
+import { useNavigate } from 'react-router-dom';
 
 const UserManagement = () => {
   const { store, actions } = useContext(Context);
@@ -8,6 +9,7 @@ const UserManagement = () => {
   const [editedUserData, setEditedUserData] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 5; // Número de usuarios por página
+  const navigate = useNavigate(); // Para navegar a la nueva ruta
 
   useEffect(() => {
     actions.fetchUsersOnSystem();
@@ -36,11 +38,10 @@ const UserManagement = () => {
     setEditedUserData({});
   };
 
-  // Paginación - Cálculo de la página actual y usuarios visibles
+  // Paginación
   const lastUserIndex = currentPage * usersPerPage;
   const firstUserIndex = lastUserIndex - usersPerPage;
   const currentUsers = store.queriedUsers.slice(firstUserIndex, lastUserIndex);
-
   const totalPages = Math.ceil(store.queriedUsers.length / usersPerPage);
 
   const handleNextPage = () => {
@@ -54,6 +55,13 @@ const UserManagement = () => {
   return (
     <div className="container mt-4">
       <h3>Gestión de Usuarios</h3>
+
+      {/* Botón para ir a la página de crear usuario */}
+      <div className="mb-3">
+        <button className="btn btn-success" onClick={() => navigate("/admin/create-user")}>
+          Crear Usuario
+        </button>
+      </div>
 
       <div className="row">
         {currentUsers.map((user) => (
