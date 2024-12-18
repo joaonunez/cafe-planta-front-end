@@ -1431,6 +1431,27 @@ const getState = ({ getActions, getStore, setStore }) => {
           return { success: false, message: "Error de conexión al servidor" };
         }
       },
+      sendPasswordResetEmail: async (email) => {
+        try {
+          const response = await fetch("http://localhost:3001/user/forgot-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+            credentials: "include", // Si necesitas cookies
+          });
+      
+          const result = await response.json();
+          if (response.ok) {
+            return { success: true, message: "Correo enviado correctamente. Revisa tu bandeja de entrada." };
+          } else {
+            return { success: false, message: result.message || "Error al enviar el correo." };
+          }
+        } catch (error) {
+          console.error("Error al enviar correo de recuperación:", error);
+          return { success: false, message: "Error de conexión al servidor." };
+        }
+      },
+      
       
       
       

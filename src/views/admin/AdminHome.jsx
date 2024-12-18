@@ -25,6 +25,7 @@ import CreateUser from "../../components/admin/CreateUser";
 // Importar AnimatePresence y motion de framer-motion
 import { AnimatePresence, motion } from 'framer-motion';
 
+
 const AdminHome = () => {
   const { store } = useContext(Context);
   const navigate = useNavigate();
@@ -258,6 +259,7 @@ const AdminHome = () => {
               <Route path="/create-dining-area" element={<CreateDiningAreaForm />} />
               <Route path="/view-admin-all-sales/view-details/:saleId" element={<SaleDetailsView />} />
               <Route path="/create-user" element={<CreateUser />} />
+              
             </Routes>
           </motion.div>
         </AnimatePresence>
