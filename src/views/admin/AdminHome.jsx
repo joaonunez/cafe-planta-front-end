@@ -15,12 +15,15 @@ import ViewAllSales from "../../components/admin/ViewAllSales";
 import ComboManagement from "../../components/admin/ComboManagement";
 import AddProduct from "../../components/admin/AddProduct";
 import EditProduct from "../../components/admin/EditProduct";
-import EditCombo from "../../components/admin/EditCombo"; // Nuevo componente
+import EditCombo from "../../components/admin/EditCombo";
 import CreateCombo from "../../components/admin/CreateCombo";
 import ManageDiningAreas from "../../components/admin/ManageDiningAreas";
 import CreateDiningAreaForm from "../../components/admin/CreateDiningArea";
 import SaleDetailsView from "../../components/admin/SaleDetailsView";
 import CreateUser from "../../components/admin/CreateUser";
+
+// Importar AnimatePresence y motion de framer-motion
+import { AnimatePresence, motion } from 'framer-motion';
 
 const AdminHome = () => {
   const { store } = useContext(Context);
@@ -33,8 +36,14 @@ const AdminHome = () => {
     }
   }, [store.token, store.admin, navigate]);
 
-  // Función para determinar si una ruta está activa
   const isActive = (path) => location.pathname === path;
+
+  // Variantes de animación para las transiciones de página
+  const pageVariants = {
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
 
   return (
     <>
@@ -51,7 +60,6 @@ const AdminHome = () => {
           </div>
         )}
 
-        {/* Diseño responsive para enlaces del panel */}
         <div className="row text-center g-2">
           <div className="col-12 col-sm-6 col-md-4 mb-3">
             <Link
@@ -223,23 +231,36 @@ const AdminHome = () => {
           </div>
         </div>
 
-        <Routes>
-          <Route path="/user-management" element={<UserManagement />} />
-          <Route
-            path="/inventory-management"
-            element={<InventoryManagement />}
-          />
-          <Route path="/combo-management" element={<ComboManagement />} />
-          <Route path="/view-admin-all-sales" element={<ViewAllSales />} />
-          <Route path="/add-product" element={<AddProduct />} />
-          <Route path="/edit-product/:id" element={<EditProduct />} />
-          <Route path="/edit-combo/:id" element={<EditCombo />} />
-          <Route path="/create-combo" element={<CreateCombo />} />
-          <Route path="/manage-dining-areas" element={<ManageDiningAreas />} />
-          <Route path="/create-dining-area" element={<CreateDiningAreaForm />} />
-          <Route path="/view-admin-all-sales/view-details/:saleId" element={<SaleDetailsView />} />
-          <Route path="/create-user" element={<CreateUser />} />
-        </Routes>
+        {/* AnimatePresence envuelve las rutas para animar las transiciones */}
+        <AnimatePresence mode="wait">
+          {/* Key única basada en la ruta actual */}
+          <motion.div
+            key={location.pathname}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3 }}
+          >
+            <Routes location={location} key={location.pathname}>
+              <Route path="/user-management" element={<UserManagement />} />
+              <Route
+                path="/inventory-management"
+                element={<InventoryManagement />}
+              />
+              <Route path="/combo-management" element={<ComboManagement />} />
+              <Route path="/view-admin-all-sales" element={<ViewAllSales />} />
+              <Route path="/add-product" element={<AddProduct />} />
+              <Route path="/edit-product/:id" element={<EditProduct />} />
+              <Route path="/edit-combo/:id" element={<EditCombo />} />
+              <Route path="/create-combo" element={<CreateCombo />} />
+              <Route path="/manage-dining-areas" element={<ManageDiningAreas />} />
+              <Route path="/create-dining-area" element={<CreateDiningAreaForm />} />
+              <Route path="/view-admin-all-sales/view-details/:saleId" element={<SaleDetailsView />} />
+              <Route path="/create-user" element={<CreateUser />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </>
   );

@@ -1402,6 +1402,35 @@ const getState = ({ getActions, getStore, setStore }) => {
           return { success: false, message: "Error de conexión al servidor" };
         }
       },
+      changeUserPassword: async (rut, adminPassword, newPassword) => {
+        const { token, admin } = getStore();
+        try {
+          const response = await fetch(`http://localhost:3001/user/change_password/${rut}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              admin_rut: admin.rut,
+              admin_password: adminPassword,
+              new_password: newPassword
+            })
+          });
+      
+          const result = await response.json();
+      
+          if (response.ok) {
+            return { success: true, message: result.message };
+          } else {
+            return { success: false, message: result.error || "Error desconocido" };
+          }
+        } catch (error) {
+          console.error("Error en changeUserPassword:", error);
+          return { success: false, message: "Error de conexión al servidor" };
+        }
+      },
       
       
       
