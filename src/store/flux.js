@@ -1405,7 +1405,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       changeUserPassword: async (rut, adminPassword, newPassword) => {
         const { token, admin } = getStore();
         try {
-          const response = await fetch(`http://localhost:3001/user/change_password/${rut}`, {
+          const response = await fetch(`https://back-end-cafe-planta.vercel.app/user/change_password/${rut}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -1433,7 +1433,7 @@ const getState = ({ getActions, getStore, setStore }) => {
       },
       sendPasswordResetEmail: async (email) => {
         try {
-          const response = await fetch("http://localhost:3001/user/forgot-password", {
+          const response = await fetch("https://back-end-cafe-planta.vercel.app/user/forgot-password", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
